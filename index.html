@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>$HUHCAT: Mice & Mayhem — Official Solana V1 Arcade Game</title>
+    <meta name="description" content="Play the official $HUHCAT browser arcade game! Stomp robo-mice, hear the real viral HUH?! meow, collect Solana tokens, and climb the on-chain leaderboard. 100% Free." />
+    <link rel="icon" type="image/png" href="huhcat.png" />
+    
+    <!-- Open Graph / Facebook / Discord / Telegram -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://jmthomasofficial.github.io/huhcatgame/" />
+    <meta property="og:title" content="$HUHCAT: Mice & Mayhem — Official Solana V1 Arcade Game" />
+    <meta property="og:description" content="Play the official $HUHCAT browser arcade game! Stomp robo-mice, hear the real viral HUH?! meow, collect Solana tokens, and climb the on-chain leaderboard. 100% Free." />
+    <meta property="og:image" content="https://jmthomasofficial.github.io/huhcatgame/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <!-- Twitter / X Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://jmthomasofficial.github.io/huhcatgame/" />
+    <meta name="twitter:title" content="$HUHCAT: Mice & Mayhem — Official Solana V1 Arcade Game" />
+    <meta name="twitter:description" content="Play the official $HUHCAT browser arcade game! Stomp robo-mice, hear the real viral HUH?! meow, collect Solana tokens, and climb the on-chain leaderboard. 100% Free." />
+    <meta name="twitter:image" content="https://jmthomasofficial.github.io/huhcatgame/og-image.jpg" />
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      :root {
+        --bg: #04050a;
+        --green: #39ff88;
+        --purple: #9945ff;
+        --panel: #0d111c;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #04050a !important;
+        color: #eef2f6;
+        font-family: 'Space Grotesk', sans-serif;
+        overflow: hidden;
+      }
+    </style>
+    <script>
+      // 在 React 加载前立即设置主题，避免闪烁
+      (function () {
+        const isInIframe = window.self !== window.top;
+
+        function applyThemeToDOM(theme) {
+          document.documentElement.classList.remove("light", "dark");
+          document.documentElement.classList.add(theme);
+          document.documentElement.setAttribute("data-theme", theme);
+        }
+
+        if (isInIframe) {
+          // 监听父窗口主动推送的主题消息
+          window.addEventListener("message", function (event) {
+            if (event.data && typeof event.data.theme === "string") {
+              const theme = event.data.theme;
+              if (theme === "light" || theme === "dark") {
+                applyThemeToDOM(theme);
+              }
+            }
+          });
+        } else {
+          // 非 iframe 环境，使用默认 light 主题
+          applyThemeToDOM("dark");
+        }
+      })();
+    </script>
+      <script>
+      (function () {
+        if (window.self === window.top) return;
+        var reported = {};
+        window.addEventListener("error", function (event) {
+          // 资源加载失败的 error 事件没有 message，此处仅上报 JS 运行时错误
+          if (!event || !event.message) return;
+          var key =
+            event.message + "|" + (event.filename || "") + "|" + (event.lineno || 0);
+          if (reported[key]) return; // 相同错误只上报一次，避免渲染循环刷屏
+          reported[key] = true;
+          try {
+            window.parent.postMessage(
+              {
+                type: "sandbox-runtime-error",
+                payload: {
+                  message: String(event.message).slice(0, 500),
+                  filename: event.filename || "",
+                  lineno: event.lineno || 0,
+                  colno: event.colno || 0,
+                  stack:
+                    event.error && event.error.stack
+                      ? String(event.error.stack).slice(0, 2000)
+                      : ""
+                }
+              },
+              "*"
+            );
+          } catch (e) {
+            /* 上报失败不影响页面运行 */
+          }
+        });
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
