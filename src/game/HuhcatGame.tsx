@@ -112,9 +112,6 @@ export default function HuhcatGame() {
         case 'Space':
           keys.up = true;
           keys.jump = true;
-          if (gameScreen === 'playing') {
-            setHuhCount(c => c + 1);
-          }
           break;
       }
       
@@ -160,6 +157,8 @@ export default function HuhcatGame() {
     if (!canvas) return;
 
     const handleTouchStart = (e: TouchEvent) => {
+      // Allow natural page scrolling when not in active gameplay
+      if (gameScreen !== 'playing') return;
       e.preventDefault();
       const touch = e.touches[0];
       const rect = canvas.getBoundingClientRect();
@@ -168,9 +167,6 @@ export default function HuhcatGame() {
       
       keysRef.current.up = true;
       keysRef.current.jump = true;
-      if (gameScreen === 'playing') {
-        setHuhCount(c => c + 1);
-      }
       
       if (x < halfWidth * 0.45) {
         keysRef.current.left = true;
@@ -180,6 +176,7 @@ export default function HuhcatGame() {
     };
 
     const handleTouchMove = (e: TouchEvent) => {
+      if (gameScreen !== 'playing') return;
       e.preventDefault();
       const touch = e.touches[0];
       const rect = canvas.getBoundingClientRect();
@@ -197,6 +194,7 @@ export default function HuhcatGame() {
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
+      if (gameScreen !== 'playing') return;
       e.preventDefault();
       keysRef.current.left = false;
       keysRef.current.right = false;
@@ -231,7 +229,12 @@ export default function HuhcatGame() {
 
       // Update
       const state = gameStateRef.current;
-      update(state, keysRef.current, dt);
+      update(state, keysRef.current, dt, canvas.width, canvas.height);
+
+      const stompedCount = state.mice.filter(m => !m.isAlive).length;
+      if (stompedCount !== huhCount) {
+        setHuhCount(stompedCount);
+      }
 
       // Check game state changes
       if (state.gameOver) {
@@ -268,8 +271,14 @@ export default function HuhcatGame() {
       if (!canvas) return;
       const container = canvas.parentElement;
       if (!container) return;
-      canvas.width = Math.min(940, container.clientWidth);
-      canvas.height = Math.min(540, Math.max(420, window.innerHeight - 380));
+      const w = Math.min(940, container.clientWidth);
+      canvas.width = w;
+      const isMobile = window.innerWidth < 640;
+      if (isMobile) {
+        canvas.height = Math.min(460, Math.max(340, Math.round(w * 0.95)));
+      } else {
+        canvas.height = Math.min(540, Math.max(420, window.innerHeight - 380));
+      }
     };
     
     handleResize();
@@ -284,22 +293,22 @@ export default function HuhcatGame() {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(57,255,136,0.08)_0%,_transparent_60%)] pointer-events-none" />
 
       {/* TOP CYBER HEADER */}
-      <header className="w-full z-30 px-4 py-2.5 bg-[#0d111c]/90 backdrop-blur-md border-b border-white/10 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <a href={WEBSITE_URL} target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <img src={`${cleanBase}cat_idle.png`} alt="HUHCAT" className="w-7 h-7 rounded-full border border-[#39ff88]" />
-            <span className="font-syne font-extrabold text-base tracking-wider grad-text">$HUHCAT</span>
+      <header className="w-full z-30 px-3 sm:px-4 py-2 sm:py-2.5 bg-[#0d111c]/90 backdrop-blur-md border-b border-white/10 flex items-center justify-between gap-2 sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          <a href={WEBSITE_URL} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 sm:gap-2 hover:opacity-80 transition-opacity">
+            <img src={`${cleanBase}cat_idle.png`} alt="HUHCAT" className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border border-[#39ff88]" />
+            <span className="font-syne font-extrabold text-sm sm:text-base tracking-wider grad-text">$HUHCAT</span>
           </a>
-          <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-mono uppercase bg-[#39ff88]/10 text-[#39ff88] border border-[#39ff88]/30">
+          <span className="hidden md:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-mono uppercase bg-[#39ff88]/10 text-[#39ff88] border border-[#39ff88]/30">
             <span className="w-1.5 h-1.5 rounded-full bg-[#39ff88] animate-ping" />
             Solana V1 Inscription
           </span>
         </div>
 
         {/* Middle/Right: Audio BGM & CA Controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {/* BGM Looping Audio Slider & Mute Toggle */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/50 border border-[#39ff88]/30 backdrop-blur-md shadow-sm">
+          <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-black/50 border border-[#39ff88]/30 backdrop-blur-md shadow-sm">
             <button
               onClick={handleToggleMute}
               className="text-sm hover:scale-110 active:scale-95 transition-transform text-zinc-300 hover:text-[#39ff88] focus:outline-none"
@@ -326,23 +335,23 @@ export default function HuhcatGame() {
           {/* Copy CA Pill */}
           <button
             onClick={copyCA}
-            className="flex items-center gap-2 px-3 py-1 rounded-lg bg-black/40 border border-[#39ff88]/30 hover:border-[#39ff88] text-xs font-mono text-zinc-300 transition-all hover:bg-[#39ff88]/10"
+            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 rounded-lg bg-black/40 border border-[#39ff88]/30 hover:border-[#39ff88] text-xs font-mono text-zinc-300 transition-all hover:bg-[#39ff88]/10"
             title="Click to copy verified Contract Address"
           >
             <span className="text-[#39ff88] font-bold">CA:</span>
-            <span className="hidden md:inline">{OFFICIAL_CA.slice(0, 6)}...{OFFICIAL_CA.slice(-6)}</span>
+            <span className="hidden lg:inline">{OFFICIAL_CA.slice(0, 6)}...{OFFICIAL_CA.slice(-6)}</span>
             <span className="text-[10px] uppercase font-bold text-[#39ff88]">
               {copiedCA ? '✓ COPIED' : '📋 COPY'}
             </span>
           </button>
 
           {/* Social Links */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1 sm:gap-1.5">
             <a
               href={TELEGRAM_URL}
               target="_blank"
               rel="noreferrer"
-              className="px-2.5 py-1 rounded-lg bg-[#229ed9]/20 hover:bg-[#229ed9]/30 text-[#229ed9] border border-[#229ed9]/40 text-xs font-mono font-bold flex items-center gap-1 transition-all"
+              className="px-2 sm:px-2.5 py-1 rounded-lg bg-[#229ed9]/20 hover:bg-[#229ed9]/30 text-[#229ed9] border border-[#229ed9]/40 text-xs font-mono font-bold flex items-center gap-1 transition-all"
             >
               <span>✈️</span>
               <span className="hidden sm:inline">TG CHAT</span>
@@ -351,7 +360,7 @@ export default function HuhcatGame() {
               href={DEXSCREENER_URL}
               target="_blank"
               rel="noreferrer"
-              className="px-2 py-1 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 text-xs font-mono font-bold transition-all"
+              className="hidden sm:inline-flex px-2 py-1 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 text-xs font-mono font-bold transition-all"
             >
               CHART
             </a>
@@ -371,24 +380,24 @@ export default function HuhcatGame() {
 
           {/* TITLE SCREEN / SPLASH SCREEN */}
           {gameScreen === 'title' && (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-end md:justify-center p-3 md:p-6 rounded-xl overflow-hidden border border-[#39ff88]/30 shadow-[0_0_60px_rgba(57,255,136,0.2)]">
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-start sm:justify-center p-2.5 sm:p-6 rounded-xl overflow-y-auto sm:overflow-hidden border border-[#39ff88]/30 shadow-[0_0_60px_rgba(57,255,136,0.2)]">
               {/* Background Splash Image with Cinematic Ambient Zoom */}
               <img
                 src={`${cleanBase}splash.jpg`}
                 alt="HUHCAT: Mice & Mayhem"
-                className="absolute inset-0 w-full h-full object-cover object-center animate-subtle-zoom"
+                className="absolute inset-0 w-full h-full object-cover object-center animate-subtle-zoom pointer-events-none"
               />
               
               {/* Vignette & Scanline Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#04050a] via-[#04050a]/65 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#04050a] via-[#04050a]/65 to-transparent pointer-events-none" />
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_40%,_#04050a_95%)] pointer-events-none" />
               <div className="absolute inset-0 scanline opacity-25 pointer-events-none" />
 
               {/* Title Screen Foreground Content */}
-              <div className="relative z-10 max-w-lg w-full text-center flex flex-col items-center mb-1 md:mb-0">
+              <div className="relative z-10 max-w-lg w-full text-center flex flex-col items-center my-auto">
                 
                 {/* TOP CENTER STEAM-QUALITY HERO ACTION ARTWORK */}
-                <div className="relative w-full max-w-xs sm:max-w-md mb-2 rounded-xl overflow-hidden border-2 border-[#39ff88]/50 shadow-[0_0_35px_rgba(57,255,136,0.35)] group bg-black/80">
+                <div className="relative w-full max-w-[260px] sm:max-w-md mb-1.5 sm:mb-2 rounded-xl overflow-hidden border-2 border-[#39ff88]/50 shadow-[0_0_35px_rgba(57,255,136,0.35)] group bg-black/80 flex-shrink-0">
                   <img
                     src={`${cleanBase}hero-pounce.jpg`}
                     alt="HUHCAT Pouncing on Robo-Mouse"
@@ -398,7 +407,7 @@ export default function HuhcatGame() {
                         target.src = 'https://jmthomasofficial.github.io/huhcatgame/hero-pounce.jpg';
                       }
                     }}
-                    className="w-full h-28 sm:h-36 object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-24 sm:h-36 object-cover object-center group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#04050a] via-transparent to-black/20" />
                   <div className="absolute bottom-1.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none">
@@ -412,46 +421,46 @@ export default function HuhcatGame() {
                 </div>
 
                 {/* Status Pill */}
-                <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-black/60 border border-[#39ff88]/50 backdrop-blur-md text-[10px] sm:text-[11px] font-mono text-[#39ff88] uppercase tracking-widest mb-1.5 shadow-lg">
+                <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-black/60 border border-[#39ff88]/50 backdrop-blur-md text-[9px] sm:text-[11px] font-mono text-[#39ff88] uppercase tracking-widest mb-1 shadow-lg">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#39ff88] animate-ping" />
                   Official Solana V1 Arcade Experience
                 </div>
 
                 {/* Main 3D Title */}
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold font-syne tracking-tight text-white drop-shadow-[0_0_25px_rgba(57,255,136,0.8)] mb-0.5">
+                <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold font-syne tracking-tight text-white drop-shadow-[0_0_25px_rgba(57,255,136,0.8)] mb-0.5">
                   HUHCAT
                 </h1>
-                <p className="text-xs sm:text-sm font-mono font-bold tracking-wider grad-text uppercase mb-2 drop-shadow-md">
+                <p className="text-[11px] sm:text-sm font-mono font-bold tracking-wider grad-text uppercase mb-1.5 drop-shadow-md">
                   ⚔️ MICE &amp; MAYHEM ⚔️
                 </p>
 
                 {/* Briefing Mini-Card */}
-                <div className="w-full bg-[#0d111c]/85 border border-white/15 backdrop-blur-md rounded-xl p-2 sm:p-2.5 mb-3 font-mono text-[11px] sm:text-xs text-zinc-300 shadow-2xl">
-                  <div className="grid grid-cols-2 gap-1.5 text-left">
+                <div className="w-full bg-[#0d111c]/85 border border-white/15 backdrop-blur-md rounded-xl p-1.5 sm:p-2.5 mb-2 sm:mb-3 font-mono text-[10px] sm:text-xs text-zinc-300 shadow-2xl">
+                  <div className="grid grid-cols-2 gap-1 sm:gap-1.5 text-left">
                     <div className="flex items-center gap-1.5">
                       <span className="text-zinc-500">MOVE:</span>
                       <span className="text-white font-bold">A / D or ⬅️ ➡️</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-zinc-500">JUMP &amp; MEOW:</span>
-                      <span className="text-[#39ff88] font-bold">SPACE (HUH!)</span>
+                      <span className="text-zinc-500">JUMP:</span>
+                      <span className="text-[#39ff88] font-bold">SPACE / TAP</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <span className="text-zinc-500">SMASH BRICKS:</span>
                       <span className="text-[#39ff88] font-bold">Jump From Below</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-zinc-500">COMBAT:</span>
-                      <span className="text-yellow-400 font-bold">Stomp Robo-Mice</span>
+                      <span className="text-zinc-500">STOMP MICE:</span>
+                      <span className="text-yellow-400 font-bold">HUH! (9 LIVES)</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Action CTA Buttons */}
-                <div className="flex flex-col sm:flex-row gap-2.5 w-full justify-center">
+                <div className="flex flex-col sm:flex-row gap-2 w-full justify-center">
                   <button
                     onClick={startGame}
-                    className="flex-1 py-3 px-6 rounded-xl bg-gradient-to-r from-[#39ff88] via-[#00ff87] to-[#00d15c] text-[#001a0a] font-black font-syne text-sm sm:text-base tracking-widest hover:shadow-[0_0_35px_rgba(57,255,136,0.8)] hover:scale-105 active:scale-95 transition-all cursor-pointer shadow-xl flex items-center justify-center gap-2"
+                    className="flex-1 py-2.5 sm:py-3 px-5 rounded-xl bg-gradient-to-r from-[#39ff88] via-[#00ff87] to-[#00d15c] text-[#001a0a] font-black font-syne text-xs sm:text-base tracking-widest hover:shadow-[0_0_35px_rgba(57,255,136,0.8)] hover:scale-105 active:scale-95 transition-all cursor-pointer shadow-xl flex items-center justify-center gap-2"
                   >
                     <span>▶</span>
                     <span>START GAME</span>
@@ -459,10 +468,11 @@ export default function HuhcatGame() {
 
                   <button
                     onClick={handleTestHuh}
-                    className="py-3 px-4 rounded-xl bg-black/60 hover:bg-black/80 border border-[#39ff88]/40 hover:border-[#39ff88] text-[#39ff88] font-mono text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer backdrop-blur-md shadow-lg"
+                    className="py-2.5 sm:py-3 px-3.5 rounded-xl bg-black/60 hover:bg-black/80 border border-[#39ff88]/40 hover:border-[#39ff88] text-[#39ff88] font-mono text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer backdrop-blur-md shadow-lg"
                     title="Trigger the iconic Ben Cat vocalization"
                   >
-                    <span>🔊</span> TEST REAL "HUH"
+                    <span>🔊</span>
+                    <span>TEST REAL "HUH"</span>
                   </button>
                 </div>
 
@@ -624,38 +634,39 @@ export default function HuhcatGame() {
 
           {/* MOBILE TOUCH CONTROLS OVERLAY */}
           {gameScreen === 'playing' && (
-            <div className="md:hidden absolute bottom-3 left-3 right-3 flex justify-between pointer-events-none z-10">
-              <div className="flex gap-2.5 pointer-events-auto">
+            <div className="md:hidden absolute bottom-2.5 left-2.5 right-2.5 flex justify-between pointer-events-none z-10">
+              <div className="flex gap-2 pointer-events-auto">
                 <button
-                  className="w-14 h-14 rounded-xl bg-[#0d111c]/80 border border-white/20 active:border-[#39ff88] active:bg-[#39ff88]/20 flex items-center justify-center text-xl font-bold font-mono text-white backdrop-blur-md shadow-lg"
-                  onTouchStart={() => { keysRef.current.left = true; }}
-                  onTouchEnd={() => { keysRef.current.left = false; }}
+                  className="w-13 h-13 rounded-xl bg-[#0d111c]/85 border border-white/20 active:border-[#39ff88] active:bg-[#39ff88]/25 flex items-center justify-center text-xl font-bold font-mono text-white backdrop-blur-md shadow-lg select-none"
+                  onTouchStart={(e) => { e.preventDefault(); keysRef.current.left = true; }}
+                  onTouchEnd={(e) => { e.preventDefault(); keysRef.current.left = false; }}
                 >
                   ◀
                 </button>
                 <button
-                  className="w-14 h-14 rounded-xl bg-[#0d111c]/80 border border-white/20 active:border-[#39ff88] active:bg-[#39ff88]/20 flex items-center justify-center text-xl font-bold font-mono text-white backdrop-blur-md shadow-lg"
-                  onTouchStart={() => { keysRef.current.right = true; }}
-                  onTouchEnd={() => { keysRef.current.right = false; }}
+                  className="w-13 h-13 rounded-xl bg-[#0d111c]/85 border border-white/20 active:border-[#39ff88] active:bg-[#39ff88]/25 flex items-center justify-center text-xl font-bold font-mono text-white backdrop-blur-md shadow-lg select-none"
+                  onTouchStart={(e) => { e.preventDefault(); keysRef.current.right = true; }}
+                  onTouchEnd={(e) => { e.preventDefault(); keysRef.current.right = false; }}
                 >
                   ▶
                 </button>
               </div>
 
               <button
-                className="w-16 h-14 rounded-xl bg-gradient-to-r from-[#39ff88] to-[#00d15c] active:opacity-80 flex flex-col items-center justify-center text-[#001a0a] font-syne font-extrabold text-xs shadow-[0_0_20px_rgba(57,255,136,0.5)] pointer-events-auto"
-                onTouchStart={() => {
+                className="w-16 h-13 rounded-xl bg-gradient-to-r from-[#39ff88] to-[#00d15c] active:opacity-80 flex flex-col items-center justify-center text-[#001a0a] font-syne font-extrabold text-xs shadow-[0_0_20px_rgba(57,255,136,0.5)] pointer-events-auto select-none"
+                onTouchStart={(e) => {
+                  e.preventDefault();
                   keysRef.current.up = true;
                   keysRef.current.jump = true;
-                  setHuhCount(c => c + 1);
                 }}
-                onTouchEnd={() => {
+                onTouchEnd={(e) => {
+                  e.preventDefault();
                   keysRef.current.up = false;
                   keysRef.current.jump = false;
                 }}
               >
                 <span>🐾</span>
-                <span>HUH!</span>
+                <span>JUMP</span>
               </button>
             </div>
           )}

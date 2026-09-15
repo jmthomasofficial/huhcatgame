@@ -26,7 +26,7 @@ export function createInitialState(): GameState {
       frameTimer: 0,
       isStomping: false,
       invincible: 0,
-      lives: 3,
+      lives: 9,
       score: 0,
       combo: 0,
       comboTimer: 0,
@@ -48,7 +48,7 @@ export function createInitialState(): GameState {
   };
 }
 
-export function update(state: GameState, keys: Keys, dt: number): GameState {
+export function update(state: GameState, keys: Keys, dt: number, viewWidth: number = 940, viewHeight: number = 500): GameState {
   if (state.gameOver || state.gameWon || state.paused) return state;
   
   state.time += dt;
@@ -71,8 +71,8 @@ export function update(state: GameState, keys: Keys, dt: number): GameState {
   // Update HUH texts
   updateHuhTexts(state, dt);
   
-  // Update camera
-  updateCamera(state);
+  // Update camera with mobile-aware dynamic framing
+  updateCamera(state, viewWidth, viewHeight);
   
   // Update screen shake
   if (state.screenShake > 0) {
@@ -138,8 +138,6 @@ function updatePlayer(state: GameState, keys: Keys, dt: number) {
     player.isOnGround = false;
     player.isStomping = false;
     playJumpSound();
-    spawnHuhText(state, player.x + player.width / 2, player.y - 10);
-    playHuhSound(0.8 + Math.random() * 0.4);
     spawnDustParticles(state, player.x + player.width / 2, player.y + player.height);
   }
   
@@ -294,6 +292,11 @@ function updatePlayer(state: GameState, keys: Keys, dt: number) {
   
   // Keep player in bounds
   if (player.x < 0) player.x = 0;
+  
+  // Pit fall check: if player drops below the map into a chasm
+  if (player.y > 680) {
+    playerDie(state);
+  }
 }
 
 function updateMice(state: GameState, dt: number) {
@@ -380,16 +383,23 @@ function updateHuhTexts(state: GameState, dt: number) {
   }
 }
 
-function updateCamera(state: GameState) {
-  const targetX = state.player.x - 350;
-  const targetY = Math.min(state.player.y - 300, 200);
+function updateCamera(state: GameState, viewWidth: number = 940, viewHeight: number = 500) {
+  // Mobile-aware dynamic framing: keep player around 32% from left edge
+  // On mobile (viewWidth = 350): keeps Ben Cat at x=112px, providing 238px viewing runway ahead!
+  // On desktop (viewWidth = 940): keeps Ben Cat at x=300px, providing 640px viewing runway ahead!
+  const playerLeadX = Math.max(80, viewWidth * 0.32);
+  const targetX = state.player.x - playerLeadX;
   
-  state.camera.x += (targetX - state.camera.x) * 0.08;
-  state.camera.y += (targetY - state.camera.y) * 0.05;
+  // Vertically keep player around 65% of viewport height
+  const playerLeadY = Math.max(180, viewHeight * 0.65);
+  const targetY = state.player.y - playerLeadY;
+  
+  state.camera.x += (targetX - state.camera.x) * 0.12;
+  state.camera.y += (targetY - state.camera.y) * 0.08;
   
   if (state.camera.x < 0) state.camera.x = 0;
-  if (state.camera.y > 200) state.camera.y = 200;
-  if (state.camera.y < -100) state.camera.y = -100;
+  if (state.camera.y > 220) state.camera.y = 220;
+  if (state.camera.y < -120) state.camera.y = -120;
 }
 
 function playerDie(state: GameState) {
@@ -404,12 +414,12 @@ function playerDie(state: GameState) {
       localStorage.setItem('huhcat_highscore', state.highScore.toString());
     }
   } else {
-    // Respawn
-    state.player.x = Math.max(0, state.camera.x + 100);
-    state.player.y = 300;
+    // Respawn safely above platform
+    state.player.x = Math.max(80, state.camera.x + 80);
+    state.player.y = 350;
     state.player.vx = 0;
     state.player.vy = 0;
-    state.player.invincible = 2;
+    state.player.invincible = 2.5;
     state.player.combo = 0;
     
     // Spawn HUH texts for death

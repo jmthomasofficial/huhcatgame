@@ -912,51 +912,74 @@ function drawHuhText(ctx: CanvasRenderingContext2D, h: HuhText, camera: { x: num
 }
 
 function drawHUD(ctx: CanvasRenderingContext2D, state: GameState, canvasWidth: number) {
-  // Left: Glassmorphic Metrics Card
+  const isMobile = canvasWidth < 480;
+  
   ctx.save();
+  
+  // Left: Glassmorphic Metrics Card
+  const cardW = isMobile ? 150 : 210;
+  const cardH = isMobile ? 66 : 78;
+  const cardX = 12;
+  const cardY = 12;
+  
   ctx.fillStyle = 'rgba(13, 17, 28, 0.85)';
-  ctx.fillRect(16, 16, 210, 78);
+  ctx.fillRect(cardX, cardY, cardW, cardH);
   ctx.strokeStyle = 'rgba(57, 255, 136, 0.35)';
-  ctx.lineWidth = 1.5;
-  ctx.strokeRect(16, 16, 210, 78);
+  ctx.lineWidth = 1.2;
+  ctx.strokeRect(cardX, cardY, cardW, cardH);
   
   // Pulsing Live Indicator Dot
   ctx.fillStyle = COLORS.green;
   ctx.shadowColor = COLORS.green;
-  ctx.shadowBlur = 8;
+  ctx.shadowBlur = 6;
   ctx.beginPath();
-  ctx.arc(28, 30, 4, 0, Math.PI * 2);
+  ctx.arc(cardX + 12, cardY + (isMobile ? 12 : 16), 3.5, 0, Math.PI * 2);
   ctx.fill();
   ctx.shadowBlur = 0;
   
-  ctx.font = 'bold 13px "Space Mono", monospace';
+  ctx.font = isMobile ? 'bold 11px "Space Mono", monospace' : 'bold 13px "Space Mono", monospace';
   ctx.textAlign = 'left';
+  
+  const textX = cardX + (isMobile ? 22 : 28);
+  const line1Y = cardY + (isMobile ? 16 : 20);
+  const lineGap = isMobile ? 18 : 22;
   
   // Score
   ctx.fillStyle = COLORS.green;
-  ctx.fillText(`$HUHCAT : ${state.player.score}`, 40, 34);
+  ctx.fillText(isMobile ? `PTS: ${state.player.score}` : `$HUHCAT : ${state.player.score}`, textX, line1Y);
   
   // Mice deleted
   ctx.fillStyle = COLORS.cyan;
   const stomped = state.mice.filter(m => !m.isAlive).length;
-  ctx.fillText(`MICE    : ${stomped}`, 40, 56);
+  ctx.fillText(isMobile ? `MICE: ${stomped}` : `MICE    : ${stomped}`, textX, line1Y + lineGap);
   
   // On-chain distance
   ctx.fillStyle = '#a78bfa';
-  ctx.fillText(`DIST    : ${Math.floor(state.distance)}m`, 40, 78);
+  ctx.fillText(isMobile ? `DIST: ${Math.floor(state.distance)}m` : `DIST    : ${Math.floor(state.distance)}m`, textX, line1Y + lineGap * 2);
   
-  // Right: Lives & High Score
-  ctx.font = '18px sans-serif';
-  ctx.textAlign = 'right';
-  for (let i = 0; i < state.player.lives; i++) {
-    ctx.fillText('❤️', canvasWidth - 16 - i * 28, 36);
-  }
+  // Right: 9 Lives Badge (Sleek Glassmorphic Pill)
+  const pillW = isMobile ? 82 : 100;
+  const pillH = isMobile ? 28 : 32;
+  const pillX = canvasWidth - pillW - 12;
+  const pillY = 12;
   
-  if (state.highScore > 0) {
+  ctx.fillStyle = 'rgba(13, 17, 28, 0.85)';
+  ctx.fillRect(pillX, pillY, pillW, pillH);
+  ctx.strokeStyle = 'rgba(255, 59, 92, 0.5)';
+  ctx.lineWidth = 1.2;
+  ctx.strokeRect(pillX, pillY, pillW, pillH);
+  
+  ctx.font = isMobile ? 'bold 12px "Space Mono", monospace' : 'bold 14px "Space Mono", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#ff3b5c';
+  ctx.fillText(`❤️ x${state.player.lives}`, pillX + pillW / 2, pillY + (isMobile ? 19 : 21));
+  
+  // High Score badge on desktop or wide mobile
+  if (state.highScore > 0 && canvasWidth >= 420) {
     ctx.fillStyle = COLORS.gold;
-    ctx.font = 'bold 12px "Space Mono", monospace';
+    ctx.font = 'bold 11px "Space Mono", monospace';
     ctx.textAlign = 'right';
-    ctx.fillText(`HIGH SCORE: ${state.highScore}`, canvasWidth - 16, 62);
+    ctx.fillText(`HIGH: ${state.highScore}`, canvasWidth - 12, pillY + pillH + 16);
   }
   
   // Center: Active Combo Banner
@@ -964,10 +987,11 @@ function drawHUD(ctx: CanvasRenderingContext2D, state: GameState, canvasWidth: n
     ctx.shadowColor = COLORS.gold;
     ctx.shadowBlur = 15;
     ctx.fillStyle = COLORS.gold;
-    ctx.font = 'bold 22px "Syne", sans-serif';
+    ctx.font = isMobile ? 'bold 16px "Syne", sans-serif' : 'bold 22px "Syne", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(`🔥 HUH COMBO x${state.player.combo}! 🔥`, canvasWidth / 2, 42);
+    ctx.fillText(`🔥 HUH x${state.player.combo}! 🔥`, canvasWidth / 2, isMobile ? 32 : 42);
     ctx.shadowBlur = 0;
   }
+  
   ctx.restore();
 }
