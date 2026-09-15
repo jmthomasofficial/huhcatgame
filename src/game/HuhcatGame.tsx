@@ -3,6 +3,7 @@ import { GameState, Keys } from './types';
 import { createInitialState, update } from './engine';
 import { render } from './renderer';
 import { initAudio, playHuhSound, startBgm, setBgmVolume, getBgmVolume, isBgmMuted, toggleBgmMute } from './audio';
+import TutorialModal from './TutorialModal';
 
 const OFFICIAL_CA = 'A9AHYeqb7nQk7LZUraw7rBCzYRjy2DRvE6NqWfFHKRdH';
 const TELEGRAM_URL = 'https://t.me/+Bzr4QWDYuMo3ZmVh';
@@ -26,6 +27,7 @@ export default function HuhcatGame() {
   const [copiedCA, setCopiedCA] = useState(false);
   const [bgmVol, setBgmVol] = useState<number>(() => Math.round(getBgmVolume() * 100));
   const [isMuted, setIsMuted] = useState<boolean>(() => isBgmMuted());
+  const [showTutorial, setShowTutorial] = useState(false);
 
   const copyCA = () => {
     navigator.clipboard.writeText(OFFICIAL_CA);
@@ -114,12 +116,23 @@ export default function HuhcatGame() {
           keys.jump = true;
           break;
       }
-      
-      if (gameScreen === 'title' && (e.code === 'Space' || e.code === 'Enter')) {
-        startGame();
+
+      if (e.code === 'KeyH') {
+        setShowTutorial(prev => !prev);
+        return;
       }
-      if ((gameScreen === 'gameover' || gameScreen === 'win') && (e.code === 'Space' || e.code === 'Enter')) {
-        restartGame();
+      if (e.code === 'Escape') {
+        setShowTutorial(false);
+        return;
+      }
+      
+      if (!showTutorial) {
+        if (gameScreen === 'title' && (e.code === 'Space' || e.code === 'Enter')) {
+          startGame();
+        }
+        if ((gameScreen === 'gameover' || gameScreen === 'win') && (e.code === 'Space' || e.code === 'Enter')) {
+          restartGame();
+        }
       }
     };
 
@@ -367,6 +380,16 @@ export default function HuhcatGame() {
             >
               CHART
             </a>
+
+            {/* Tutorial / Guide Button */}
+            <button
+              onClick={() => setShowTutorial(true)}
+              className="px-2 sm:px-2.5 py-1 rounded-lg bg-[#39ff88]/15 hover:bg-[#39ff88]/25 text-[#39ff88] border border-[#39ff88]/40 text-xs font-mono font-bold flex items-center gap-1 transition-all cursor-pointer shadow-sm hover:shadow-[0_0_15px_rgba(57,255,136,0.3)]"
+              title="How to Play & Orangie Powerups Guide (Press H)"
+            >
+              <span>📖</span>
+              <span className="hidden sm:inline">TUTORIAL</span>
+            </button>
           </div>
         </div>
       </header>
@@ -469,6 +492,15 @@ export default function HuhcatGame() {
                   >
                     <span>▶</span>
                     <span>START GAME</span>
+                  </button>
+
+                  <button
+                    onClick={() => setShowTutorial(true)}
+                    className="py-2.5 sm:py-3 px-3.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/40 hover:border-purple-400 text-purple-300 font-mono text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer backdrop-blur-md shadow-lg"
+                    title="Read full game tutorial & powerups guide"
+                  >
+                    <span>📖</span>
+                    <span>HOW TO PLAY</span>
                   </button>
 
                   <button
@@ -597,6 +629,12 @@ export default function HuhcatGame() {
                     🔄 RETRY MISSION
                   </button>
 
+                  <button
+                    onClick={() => setShowTutorial(true)}
+                    className="w-full min-h-11 py-2 sm:py-2.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 font-mono text-xs font-bold transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <span>📖</span> HOW TO PLAY & POWERUPS
+                  </button>
                   <a
                     href={TELEGRAM_URL}
                     target="_blank"
@@ -822,6 +860,9 @@ export default function HuhcatGame() {
           <a href={PUMPFUN_URL} target="_blank" rel="noreferrer" className="text-purple-400 hover:underline">Pump.fun</a>
         </div>
       </footer>
+
+      {/* TUTORIAL & HOW TO PLAY MODAL */}
+      <TutorialModal isOpen={showTutorial} onClose={() => setShowTutorial(false)} />
     </div>
   );
 }

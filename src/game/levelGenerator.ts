@@ -202,19 +202,22 @@ export function generateLevel(seed: number): { platforms: Platform[]; mice: Mous
       
       x += groundWidth2;
 
-    } else if (segmentType === 'D') { // Overhead Bricks
+    } else if (segmentType === 'D') { // Overhead Bricks (fully reachable jump height + stepping stone)
       const groundWidth = 500 + rng() * 200;
       platforms.push({ x, y: groundY, width: groundWidth, height: 100, type: 'ground', zone });
       
       const numBlocks = 4 + Math.floor(rng() * 4);
       const startBlockX = x + 150;
-      const blockY = groundY - 220; // 185px clearance (groundY - 35) since blocks are 35px tall
+      const blockY = groundY - 140; // 105px clearance (35px tall block), comfortably jumpable!
       
+      // Stepping stone cloud before the brick row so player can choose to jump on top or run below
+      platforms.push({ x: startBlockX - 60, y: groundY - 75, width: 50, height: 18, type: 'cloud', zone });
+
       for (let i = 0; i < numBlocks; i++) {
         const bX = startBlockX + i * 40;
         platforms.push({ x: bX, y: blockY, width: 40, height: 35, type: rng() < 0.3 ? 'question' : 'brick', zone });
         if (rng() < 0.4) {
-          coins.push({ x: bX + 8, y: blockY - 40, width: 24, height: 24, collected: false, frame: 0, frameTimer: 0, type: 'fish' });
+          coins.push({ x: bX + 8, y: blockY - 35, width: 24, height: 24, collected: false, frame: 0, frameTimer: 0, type: 'fish' });
         }
       }
       
