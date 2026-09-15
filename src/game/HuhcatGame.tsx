@@ -10,6 +10,9 @@ const WEBSITE_URL = 'https://jmthomasofficial.github.io/huhcat/';
 const DEXSCREENER_URL = 'https://dexscreener.com/solana/3wx6X4WVbyo59hCBuYozaWscdDkbbJo6cX28FKWFMxbS';
 const PUMPFUN_URL = `https://pump.fun/coin/${OFFICIAL_CA}`;
 
+const baseUrl = import.meta.env.BASE_URL || './';
+const cleanBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+
 export default function HuhcatGame() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameStateRef = useRef<GameState>(createInitialState());
@@ -284,7 +287,7 @@ export default function HuhcatGame() {
       <header className="w-full z-30 px-4 py-2.5 bg-[#0d111c]/90 backdrop-blur-md border-b border-white/10 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <a href={WEBSITE_URL} target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <img src="/cat_idle.png" alt="HUHCAT" className="w-7 h-7 rounded-full border border-[#39ff88]" />
+            <img src={`${cleanBase}cat_idle.png`} alt="HUHCAT" className="w-7 h-7 rounded-full border border-[#39ff88]" />
             <span className="font-syne font-extrabold text-base tracking-wider grad-text">$HUHCAT</span>
           </a>
           <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-mono uppercase bg-[#39ff88]/10 text-[#39ff88] border border-[#39ff88]/30">
@@ -371,7 +374,7 @@ export default function HuhcatGame() {
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-end md:justify-center p-3 md:p-6 rounded-xl overflow-hidden border border-[#39ff88]/30 shadow-[0_0_60px_rgba(57,255,136,0.2)]">
               {/* Background Splash Image with Cinematic Ambient Zoom */}
               <img
-                src="/splash.jpg"
+                src={`${cleanBase}splash.jpg`}
                 alt="HUHCAT: Mice & Mayhem"
                 className="absolute inset-0 w-full h-full object-cover object-center animate-subtle-zoom"
               />
@@ -387,8 +390,14 @@ export default function HuhcatGame() {
                 {/* TOP CENTER STEAM-QUALITY HERO ACTION ARTWORK */}
                 <div className="relative w-full max-w-xs sm:max-w-md mb-2 rounded-xl overflow-hidden border-2 border-[#39ff88]/50 shadow-[0_0_35px_rgba(57,255,136,0.35)] group bg-black/80">
                   <img
-                    src="/hero-pounce.jpg"
+                    src={`${cleanBase}hero-pounce.jpg`}
                     alt="HUHCAT Pouncing on Robo-Mouse"
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      if (!target.src.includes('jmthomasofficial.github.io')) {
+                        target.src = 'https://jmthomasofficial.github.io/huhcatgame/hero-pounce.jpg';
+                      }
+                    }}
                     className="w-full h-28 sm:h-36 object-cover object-center group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#04050a] via-transparent to-black/20" />
@@ -508,13 +517,13 @@ export default function HuhcatGame() {
           {gameScreen === 'gameover' && (
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#04050a]/90 backdrop-blur-md p-6 rounded-xl border border-red-500/30 overflow-hidden">
               <img
-                src="/splash.jpg"
+                src={`${cleanBase}splash.jpg`}
                 alt="HUHCAT"
                 className="absolute inset-0 w-full h-full object-cover object-center opacity-20 blur-sm pointer-events-none"
               />
               <div className="relative z-10 max-w-sm w-full text-center">
                 <div className="w-20 h-20 mx-auto rounded-full p-1 bg-red-500/20 border-2 border-red-500 mb-3 flex items-center justify-center shadow-[0_0_30px_rgba(255,59,92,0.4)]">
-                  <img src="/cat_dead.png" alt="Defeated" className="w-full h-full rounded-full object-cover" />
+                  <img src={`${cleanBase}cat_dead.png`} alt="Defeated" className="w-full h-full rounded-full object-cover" />
                 </div>
 
                 <h2 className="text-3xl md:text-4xl font-extrabold font-syne text-red-500 mb-1 tracking-tight">
@@ -573,13 +582,13 @@ export default function HuhcatGame() {
           {gameScreen === 'win' && (
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#04050a]/90 backdrop-blur-md p-6 rounded-xl border border-[#39ff88]/40 overflow-hidden">
               <img
-                src="/splash.jpg"
+                src={`${cleanBase}splash.jpg`}
                 alt="HUHCAT"
                 className="absolute inset-0 w-full h-full object-cover object-center opacity-25 blur-sm pointer-events-none"
               />
               <div className="relative z-10 max-w-sm w-full text-center">
                 <div className="w-24 h-24 mx-auto rounded-full p-1 bg-gradient-to-tr from-[#39ff88] to-yellow-400 pulse-emerald mb-3">
-                  <img src="/cat_idle.png" alt="Victory" className="w-full h-full rounded-full object-cover" />
+                  <img src={`${cleanBase}cat_idle.png`} alt="Victory" className="w-full h-full rounded-full object-cover" />
                 </div>
 
                 <h2 className="text-3xl md:text-4xl font-extrabold font-syne grad-text mb-1">
