@@ -505,9 +505,19 @@ function drawParticle(ctx: CanvasRenderingContext2D, p: Particle, camera: { x: n
   ctx.fillStyle = p.color;
   ctx.shadowColor = p.color;
   ctx.shadowBlur = 6;
-  ctx.beginPath();
-  ctx.arc(x, y, p.size, 0, Math.PI * 2);
-  ctx.fill();
+  
+  if (p.type === 'brick') {
+    ctx.translate(x, y);
+    if (p.rotation !== undefined) ctx.rotate(p.rotation);
+    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+    ctx.strokeStyle = '#39ff88';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(-p.size / 2, -p.size / 2, p.size, p.size);
+  } else {
+    ctx.beginPath();
+    ctx.arc(x, y, p.size, 0, Math.PI * 2);
+    ctx.fill();
+  }
   ctx.restore();
 }
 

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { GameState, Keys } from './types';
 import { createInitialState, update } from './engine';
 import { render } from './renderer';
-import { initAudio, playHuhSound } from './audio';
+import { initAudio, playHuhSound, startBgm, setBgmVolume, getBgmVolume, isBgmMuted, toggleBgmMute } from './audio';
 
 const OFFICIAL_CA = 'A9AHYeqb7nQk7LZUraw7rBCzYRjy2DRvE6NqWfFHKRdH';
 const TELEGRAM_URL = 'https://t.me/+Bzr4QWDYuMo3ZmVh';
@@ -21,6 +21,8 @@ export default function HuhcatGame() {
   const [highScore, setHighScore] = useState(parseInt(localStorage.getItem('huhcat_highscore') || '0'));
   const [huhCount, setHuhCount] = useState(0);
   const [copiedCA, setCopiedCA] = useState(false);
+  const [bgmVol, setBgmVol] = useState<number>(() => Math.round(getBgmVolume() * 100));
+  const [isMuted, setIsMuted] = useState<boolean>(() => isBgmMuted());
 
   const copyCA = () => {
     navigator.clipboard.writeText(OFFICIAL_CA);
@@ -31,12 +33,35 @@ export default function HuhcatGame() {
   const handleTestHuh = (e: React.MouseEvent) => {
     e.stopPropagation();
     initAudio();
+    startBgm();
     playHuhSound(1);
     setHuhCount(c => c + 1);
   };
 
+  const handleToggleMute = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    initAudio();
+    const muted = toggleBgmMute();
+    setIsMuted(muted);
+    if (!muted) {
+      startBgm();
+    }
+  };
+
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseInt(e.target.value, 10);
+    setBgmVol(val);
+    setBgmVolume(val / 100);
+    if (isMuted && val > 0) {
+      toggleBgmMute();
+      setIsMuted(false);
+    }
+    startBgm();
+  };
+
   const startGame = useCallback(() => {
     initAudio();
+    startBgm();
     gameStateRef.current = createInitialState();
     setGameScreen('playing');
     setHuhCount(0);
@@ -44,6 +69,7 @@ export default function HuhcatGame() {
 
   const restartGame = useCallback(() => {
     initAudio();
+    startBgm();
     gameStateRef.current = createInitialState();
     setGameScreen('playing');
     setHuhCount(0);
@@ -251,8 +277,34 @@ export default function HuhcatGame() {
           </span>
         </div>
 
-        {/* Copy CA Pill */}
+        {/* Middle/Right: Audio BGM & CA Controls */}
         <div className="flex items-center gap-2">
+          {/* BGM Looping Audio Slider & Mute Toggle */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/50 border border-[#39ff88]/30 backdrop-blur-md shadow-sm">
+            <button
+              onClick={handleToggleMute}
+              className="text-sm hover:scale-110 active:scale-95 transition-transform text-zinc-300 hover:text-[#39ff88] focus:outline-none"
+              title={isMuted ? "Unmute BGM (LifeLegend Loop)" : "Mute BGM"}
+            >
+              {isMuted || bgmVol === 0 ? '🔇' : bgmVol < 40 ? '🔉' : '🔊'}
+            </button>
+            <div className="hidden sm:flex items-center gap-1.5">
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={isMuted ? 0 : bgmVol}
+                onChange={handleVolumeChange}
+                className="w-16 md:w-20 h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[#39ff88]"
+                title={`BGM Volume: ${isMuted ? 0 : bgmVol}%`}
+              />
+              <span className="text-[10px] font-mono text-[#39ff88] w-6 text-right font-bold">
+                {isMuted ? '0%' : `${bgmVol}%`}
+              </span>
+            </div>
+          </div>
+
+          {/* Copy CA Pill */}
           <button
             onClick={copyCA}
             className="flex items-center gap-2 px-3 py-1 rounded-lg bg-black/40 border border-[#39ff88]/30 hover:border-[#39ff88] text-xs font-mono text-zinc-300 transition-all hover:bg-[#39ff88]/10"
@@ -341,12 +393,12 @@ export default function HuhcatGame() {
                       <span className="text-[#39ff88] font-bold">SPACE (HUH!)</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-zinc-500">COMBAT:</span>
-                      <span className="text-yellow-400 font-bold">Stomp Robo-Mice</span>
+                      <span className="text-zinc-500">SMASH BRICKS:</span>
+                      <span className="text-[#39ff88] font-bold">Jump From Below</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-zinc-500">LOOT:</span>
-                      <span className="text-purple-400 font-bold">$S Solana Coins</span>
+                      <span className="text-zinc-500">COMBAT:</span>
+                      <span className="text-yellow-400 font-bold">Stomp Robo-Mice</span>
                     </div>
                   </div>
                 </div>

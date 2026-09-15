@@ -7,62 +7,108 @@ export function generateLevel(seed: number): { platforms: Platform[]; mice: Mous
   
   const levelLength = 8000 + Math.floor(Math.random() * 4000);
   let x = 0;
-  let groundY = 500;
+  const groundY = 500;
   
-  // Starting ground
+  // 1. GUARANTEED SAFE SPAWN RUNWAY
+  // Wide open starting track from x = 0 to 750 with zero overhead blocks
+  const runwayWidth = 750;
   platforms.push({
-    x: 0, y: groundY, width: 400, height: 40, type: 'ground'
+    x: 0,
+    y: groundY,
+    width: runwayWidth,
+    height: 40,
+    type: 'ground'
   });
   
-  x = 400;
+  // Welcome collectible coin arc on runway
+  for (let i = 0; i < 5; i++) {
+    coins.push({
+      x: 220 + i * 90,
+      y: groundY - 60 - Math.sin((i / 4) * Math.PI) * 35,
+      width: 20,
+      height: 20,
+      collected: false,
+      frame: 0,
+      frameTimer: 0,
+      type: i === 4 ? 'golden' : 'fish'
+    });
+  }
   
+  // Single easy introductory mouse on runway
+  mice.push({
+    x: 520,
+    y: groundY - 26,
+    width: 28,
+    height: 22,
+    vx: -1.2,
+    isAlive: true,
+    frame: 0,
+    frameTimer: 0,
+    type: 'normal',
+    direction: -1,
+    squishTimer: 0
+  });
+
+  x = runwayWidth;
+  
+  // 2. PROCEDURAL LEVEL SEGMENTS
   while (x < levelLength) {
-    const segmentType = Math.random();
+    const segmentRoll = Math.random();
     
-    if (segmentType < 0.3) {
-      // Ground gap with floating platforms
-      const gapWidth = 80 + Math.random() * 120;
+    if (segmentRoll < 0.28) {
+      // SEGMENT A: Ground gap with safe aerial stepping stones
+      const gapWidth = 90 + Math.random() * 50; // 90px to 140px (well within 160px jump arc)
       x += gapWidth;
       
-      // Floating platforms over the gap
-      const numPlatforms = 1 + Math.floor(Math.random() * 3);
+      // Elevated stepping platforms over the chasm
+      const numPlatforms = 1 + Math.floor(Math.random() * 2);
       for (let i = 0; i < numPlatforms; i++) {
-        const platX = x - gapWidth + (gapWidth / (numPlatforms + 1)) * (i + 1);
-        const platY = groundY - 60 - Math.random() * 100;
-        const platType = Math.random() < 0.3 ? 'question' : (Math.random() < 0.2 ? 'cloud' : 'brick');
+        const platX = x - gapWidth + (gapWidth / (numPlatforms + 1)) * (i + 1) - 35;
+        const platY = groundY - 50 - Math.random() * 40;
         
+        // Use 'cloud' or 'question' so platforms over gaps are stable
+        const platType = Math.random() < 0.5 ? 'cloud' : 'question';
         platforms.push({
-          x: platX, y: platY, width: 80 + Math.random() * 40, height: 20,
-          type: platType as Platform['type'],
+          x: platX,
+          y: platY,
+          width: 70,
+          height: 20,
+          type: platType,
           hit: false,
           coinCollected: false
         });
         
-        // Add coins above platforms
-        if (Math.random() < 0.5) {
-          coins.push({
-            x: platX + 20, y: platY - 40, width: 20, height: 20,
-            collected: false, frame: 0, frameTimer: 0,
-            type: Math.random() < 0.15 ? 'golden' : 'fish'
-          });
-        }
+        coins.push({
+          x: platX + 25,
+          y: platY - 35,
+          width: 20,
+          height: 20,
+          collected: false,
+          frame: 0,
+          frameTimer: 0,
+          type: Math.random() < 0.2 ? 'golden' : 'fish'
+        });
       }
       
-      // Ground continues after gap
-      const groundWidth = 200 + Math.random() * 300;
+      // Ground continues firmly after the gap
+      const groundWidth = 280 + Math.random() * 200;
       platforms.push({
-        x: x, y: groundY, width: groundWidth, height: 40, type: 'ground'
+        x: x,
+        y: groundY,
+        width: groundWidth,
+        height: 40,
+        type: 'ground'
       });
       
-      // Add mice on ground
-      if (Math.random() < 0.6) {
-        const mouseType = Math.random() < 0.15 ? 'big' : (Math.random() < 0.3 ? 'fast' : 'normal');
+      // Mice on landing ground
+      if (Math.random() < 0.7) {
+        const mouseType = Math.random() < 0.2 ? 'fast' : 'normal';
         mice.push({
-          x: x + 50 + Math.random() * (groundWidth - 100),
-          y: groundY - 30,
-          width: mouseType === 'big' ? 40 : 28,
-          height: mouseType === 'big' ? 30 : 22,
-          vx: mouseType === 'fast' ? -2.5 : (mouseType === 'big' ? -0.8 : -1.5),
+          x: x + 80 + Math.random() * (groundWidth - 120),
+          y: groundY - 26,
+          width: 28,
+          height: 22,
+          vx: mouseType === 'fast' ? -2.2 : -1.4,
           isAlive: true,
           frame: 0,
           frameTimer: 0,
@@ -73,159 +119,232 @@ export function generateLevel(seed: number): { platforms: Platform[]; mice: Mous
       }
       
       x += groundWidth;
-    } else if (segmentType < 0.55) {
-      // Staircase section
-      const steps = 3 + Math.floor(Math.random() * 4);
-      const stepWidth = 60;
-      const stepHeight = 30;
-      const direction = Math.random() < 0.5 ? 1 : -1;
+    } else if (segmentRoll < 0.52) {
+      // SEGMENT B: Solid Stepped Hill / Mountain (NO hollow traps or low ceilings)
+      const steps = 3 + Math.floor(Math.random() * 2); // 3 to 4 steps
+      const stepWidth = 55;
+      const stepHeight = 32;
+      const hillBaseWidth = (steps * 2 + 1) * stepWidth + 60;
       
-      for (let i = 0; i < steps; i++) {
-        const stepX = x + i * stepWidth;
-        const stepY = groundY - (direction > 0 ? (i + 1) * stepHeight : (steps - i) * stepHeight);
-        
-        platforms.push({
-          x: stepX, y: stepY, width: stepWidth, height: 20, type: 'brick'
-        });
-        
-        if (Math.random() < 0.4) {
-          coins.push({
-            x: stepX + 20, y: stepY - 35, width: 20, height: 20,
-            collected: false, frame: 0, frameTimer: 0, type: 'fish'
-          });
-        }
-      }
-      
-      // Ground under staircase
+      // Continuous ground under entire mountain section
       platforms.push({
-        x: x, y: groundY, width: steps * stepWidth + 50, height: 40, type: 'ground'
+        x: x,
+        y: groundY,
+        width: hillBaseWidth,
+        height: 40,
+        type: 'ground'
       });
       
-      // Mouse at top
-      if (Math.random() < 0.5) {
-        mice.push({
-          x: x + steps * stepWidth - 40,
-          y: groundY - (direction > 0 ? steps * stepHeight : stepHeight) - 30,
-          width: 28, height: 22,
-          vx: -1.5, isAlive: true, frame: 0, frameTimer: 0,
-          type: 'normal', direction: -1, squishTimer: 0
-        });
-      }
-      
-      x += steps * stepWidth + 50;
-    } else if (segmentType < 0.75) {
-      // Moving platforms section
-      const sectionWidth = 300 + Math.random() * 200;
-      
-      // Ground with gaps
-      const groundParts = 2 + Math.floor(Math.random() * 2);
-      const partWidth = sectionWidth / groundParts;
-      
-      for (let i = 0; i < groundParts; i++) {
+      // Solid ascending steps (each step is solid down to groundY)
+      for (let i = 0; i < steps; i++) {
+        const stepY = groundY - (i + 1) * stepHeight;
+        // Ascending step
         platforms.push({
-          x: x + i * partWidth, y: groundY, width: partWidth - 60, height: 40, type: 'ground'
-        });
-      }
-      
-      // Moving platforms
-      const numMoving = 2 + Math.floor(Math.random() * 3);
-      for (let i = 0; i < numMoving; i++) {
-        const moveX = x + (sectionWidth / numMoving) * i + 30;
-        const moveY = groundY - 80 - Math.random() * 80;
-        
-        platforms.push({
-          x: moveX, y: moveY, width: 70, height: 20,
-          type: 'moving',
-          moveDir: 1,
-          moveRange: 60 + Math.random() * 40,
-          originX: moveX
+          x: x + 30 + i * stepWidth,
+          y: stepY,
+          width: stepWidth,
+          height: groundY - stepY + 40,
+          type: 'ground'
         });
         
-        coins.push({
-          x: moveX + 25, y: moveY - 35, width: 20, height: 20,
-          collected: false, frame: 0, frameTimer: 0, type: 'fish'
+        // Descending step
+        platforms.push({
+          x: x + hillBaseWidth - 30 - (i + 1) * stepWidth,
+          y: stepY,
+          width: stepWidth,
+          height: groundY - stepY + 40,
+          type: 'ground'
         });
       }
+      
+      // Peak summit platform
+      const peakY = groundY - (steps + 1) * stepHeight;
+      platforms.push({
+        x: x + 30 + steps * stepWidth,
+        y: peakY,
+        width: stepWidth,
+        height: groundY - peakY + 40,
+        type: 'ground'
+      });
+      
+      // Floating breakable bricks and prize coins high above peak
+      platforms.push({
+        x: x + 30 + steps * stepWidth,
+        y: peakY - 80,
+        width: 40,
+        height: 35,
+        type: 'question',
+        hit: false,
+        coinCollected: false
+      });
+      
+      coins.push({
+        x: x + 30 + steps * stepWidth + 10,
+        y: peakY - 125,
+        width: 20,
+        height: 20,
+        collected: false,
+        frame: 0,
+        frameTimer: 0,
+        type: 'golden'
+      });
+      
+      // Enemy patrolling mountain peak
+      mice.push({
+        x: x + 30 + steps * stepWidth + 5,
+        y: peakY - 26,
+        width: 28,
+        height: 22,
+        vx: -1.0,
+        isAlive: true,
+        frame: 0,
+        frameTimer: 0,
+        type: 'normal',
+        direction: -1,
+        squishTimer: 0
+      });
+      
+      x += hillBaseWidth;
+    } else if (segmentRoll < 0.76) {
+      // SEGMENT C: Moving tech platforms over low terrain
+      const sectionWidth = 360 + Math.random() * 120;
+      
+      // Ground with a single jumpable trench
+      const partWidth = sectionWidth / 2 - 40;
+      platforms.push({
+        x: x,
+        y: groundY,
+        width: partWidth,
+        height: 40,
+        type: 'ground'
+      });
+      platforms.push({
+        x: x + partWidth + 80,
+        y: groundY,
+        width: partWidth,
+        height: 40,
+        type: 'ground'
+      });
+      
+      // Smooth moving platform spanning trench
+      const moveX = x + partWidth + 10;
+      const moveY = groundY - 70;
+      platforms.push({
+        x: moveX,
+        y: moveY,
+        width: 75,
+        height: 20,
+        type: 'moving',
+        moveDir: 1,
+        moveRange: 45,
+        originX: moveX
+      });
+      
+      coins.push({
+        x: moveX + 28,
+        y: moveY - 35,
+        width: 20,
+        height: 20,
+        collected: false,
+        frame: 0,
+        frameTimer: 0,
+        type: 'golden'
+      });
       
       x += sectionWidth;
-    } else if (segmentType < 0.9) {
-      // Question block row
-      const numBlocks = 3 + Math.floor(Math.random() * 5);
-      const blockY = groundY - 100 - Math.random() * 60;
+    } else {
+      // SEGMENT D: Classic Overhead Breakable Bricks & Solana Mystery Blocks
+      // Generates modular 40px blocks with 130px clearance above ground
+      // Cat (height 50) walks freely underneath, can jump up and SMASH blocks from below!
+      const numBlocks = 4 + Math.floor(Math.random() * 4);
+      const blockWidth = 40;
+      const blockHeight = 35;
+      const blockY = groundY - 125; // 125px vertical clearance, jump reaches 140px
+      const sectionWidth = numBlocks * blockWidth + 160;
       
-      // Ground underneath
+      // Continuous ground
       platforms.push({
-        x: x - 20, y: groundY, width: numBlocks * 50 + 40, height: 40, type: 'ground'
+        x: x,
+        y: groundY,
+        width: sectionWidth,
+        height: 40,
+        type: 'ground'
       });
       
       for (let i = 0; i < numBlocks; i++) {
-        const isQuestion = Math.random() < 0.4;
+        const isQuestion = Math.random() < 0.3;
+        const bX = x + 70 + i * blockWidth;
+        
         platforms.push({
-          x: x + i * 50, y: blockY, width: 40, height: 40,
+          x: bX,
+          y: blockY,
+          width: blockWidth,
+          height: blockHeight,
           type: isQuestion ? 'question' : 'brick',
           hit: false,
           coinCollected: false
         });
+        
+        // High bonus coin perched on top of some breakable bricks
+        if (!isQuestion && Math.random() < 0.45) {
+          coins.push({
+            x: bX + 10,
+            y: blockY - 35,
+            width: 20,
+            height: 20,
+            collected: false,
+            frame: 0,
+            frameTimer: 0,
+            type: Math.random() < 0.2 ? 'golden' : 'fish'
+          });
+        }
       }
       
-      // Mice between blocks
-      if (Math.random() < 0.7) {
+      // Mice patrol on ground under the blocks
+      const numMice = 1 + Math.floor(Math.random() * 2);
+      for (let m = 0; m < numMice; m++) {
+        const mouseType = Math.random() < 0.2 ? 'big' : 'normal';
         mice.push({
-          x: x + Math.random() * (numBlocks * 50),
-          y: groundY - 30,
-          width: 28, height: 22,
-          vx: -1.5, isAlive: true, frame: 0, frameTimer: 0,
-          type: Math.random() < 0.2 ? 'fast' : 'normal',
-          direction: -1, squishTimer: 0
-        });
-      }
-      
-      x += numBlocks * 50 + 40;
-    } else {
-      // Long ground with enemies
-      const groundWidth = 300 + Math.random() * 400;
-      platforms.push({
-        x: x, y: groundY, width: groundWidth, height: 40, type: 'ground'
-      });
-      
-      // Multiple mice
-      const numMice = 1 + Math.floor(Math.random() * 3);
-      for (let i = 0; i < numMice; i++) {
-        const mouseType = Math.random() < 0.1 ? 'big' : (Math.random() < 0.3 ? 'fast' : 'normal');
-        mice.push({
-          x: x + 50 + (groundWidth / numMice) * i,
-          y: groundY - 30,
-          width: mouseType === 'big' ? 40 : 28,
+          x: x + 90 + m * 90,
+          y: groundY - (mouseType === 'big' ? 32 : 24),
+          width: mouseType === 'big' ? 38 : 28,
           height: mouseType === 'big' ? 30 : 22,
-          vx: mouseType === 'fast' ? -2.5 : (mouseType === 'big' ? -0.8 : -1.5),
-          isAlive: true, frame: 0, frameTimer: 0,
-          type: mouseType, direction: -1, squishTimer: 0
+          vx: mouseType === 'big' ? -0.9 : -1.4,
+          isAlive: true,
+          frame: 0,
+          frameTimer: 0,
+          type: mouseType,
+          direction: -1,
+          squishTimer: 0
         });
       }
       
-      // Coins in the air
-      const numCoins = 2 + Math.floor(Math.random() * 4);
-      for (let i = 0; i < numCoins; i++) {
-        coins.push({
-          x: x + 30 + (groundWidth / numCoins) * i,
-          y: groundY - 80 - Math.random() * 60,
-          width: 20, height: 20,
-          collected: false, frame: 0, frameTimer: 0,
-          type: Math.random() < 0.1 ? 'golden' : 'fish'
-        });
-      }
-      
-      x += groundWidth;
+      x += sectionWidth;
     }
-    
-    // Random gap between segments
-    x += 20 + Math.random() * 40;
   }
   
-  // End platform (flag area)
+  // 3. FINAL VICTORY RUNWAY & FLAG ZONE
   platforms.push({
-    x: x, y: groundY, width: 200, height: 40, type: 'ground'
+    x: x,
+    y: groundY,
+    width: 400,
+    height: 40,
+    type: 'ground'
   });
   
-  return { platforms, mice, coins, levelLength: x + 200 };
+  // Final victory golden coin arc
+  for (let i = 0; i < 6; i++) {
+    coins.push({
+      x: x + 50 + i * 40,
+      y: groundY - 70 - Math.sin((i / 5) * Math.PI) * 40,
+      width: 20,
+      height: 20,
+      collected: false,
+      frame: 0,
+      frameTimer: 0,
+      type: 'golden'
+    });
+  }
+  
+  return { platforms, mice, coins, levelLength: x + 350 };
 }

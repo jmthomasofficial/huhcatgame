@@ -216,3 +216,111 @@ export function playComboSound(combo: number) {
     oscillator.stop(ctx.currentTime + 0.15);
   } catch (e) {}
 }
+
+export function playBrickBreakSound() {
+  try {
+    const ctx = getAudioContext();
+    const now = ctx.currentTime;
+    
+    // Punchy crunch
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(260, now);
+    osc.frequency.exponentialRampToValueAtTime(45, now + 0.16);
+    
+    gain.gain.setValueAtTime(0.35, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.16);
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    osc.start(now);
+    osc.stop(now + 0.16);
+    
+    // Crisp click / fracture
+    const clickOsc = ctx.createOscillator();
+    const clickGain = ctx.createGain();
+    clickOsc.type = 'square';
+    clickOsc.frequency.setValueAtTime(520, now);
+    clickOsc.frequency.exponentialRampToValueAtTime(90, now + 0.08);
+    
+    clickGain.gain.setValueAtTime(0.25, now);
+    clickGain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+    
+    clickOsc.connect(clickGain);
+    clickGain.connect(ctx.destination);
+    
+    clickOsc.start(now);
+    clickOsc.stop(now + 0.08);
+  } catch (e) {}
+}
+
+// Looping Background Music (BGM) Engine
+let bgmAudio: HTMLAudioElement | null = null;
+let bgmVolume = parseFloat(localStorage.getItem('huhcat_bgm_volume') || '0.5');
+let bgmMuted = localStorage.getItem('huhcat_bgm_muted') === 'true';
+
+export function getBgmAudio(): HTMLAudioElement {
+  if (!bgmAudio) {
+    const baseUrl = import.meta.env.BASE_URL || '/';
+    const cleanBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+    bgmAudio = new Audio(`${cleanBase}bgm.mp3`);
+    bgmAudio.loop = true;
+    bgmAudio.volume = bgmMuted ? 0 : bgmVolume;
+  }
+  return bgmAudio;
+}
+
+export function startBgm() {
+  try {
+    const audio = getBgmAudio();
+    audio.volume = bgmMuted ? 0 : bgmVolume;
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(() => {
+        // Autoplay policy: will play on next user interaction
+      });
+    }
+  } catch (e) {
+    console.warn('startBgm error:', e);
+  }
+}
+
+export function stopBgm() {
+  if (bgmAudio) {
+    bgmAudio.pause();
+  }
+}
+
+export function setBgmVolume(val: number) {
+  bgmVolume = Math.max(0, Math.min(1, val));
+  localStorage.setItem('huhcat_bgm_volume', bgmVolume.toString());
+  if (bgmAudio) {
+    bgmAudio.volume = bgmMuted ? 0 : bgmVolume;
+  }
+}
+
+export function getBgmVolume(): number {
+  return bgmVolume;
+}
+
+export function isBgmMuted(): boolean {
+  return bgmMuted;
+}
+
+export function setBgmMuted(muted: boolean) {
+  bgmMuted = muted;
+  localStorage.setItem('huhcat_bgm_muted', bgmMuted.toString());
+  if (bgmAudio) {
+    bgmAudio.volume = bgmMuted ? 0 : bgmVolume;
+    if (!bgmMuted && bgmAudio.paused) {
+      bgmAudio.play().catch(() => {});
+    }
+  }
+}
+
+export function toggleBgmMute(): boolean {
+  setBgmMuted(!bgmMuted);
+  return bgmMuted;
+}

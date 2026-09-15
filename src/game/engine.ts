@@ -1,6 +1,6 @@
 import { GameState, Keys, Player, Particle, HuhText } from './types';
 import { generateLevel } from './levelGenerator';
-import { playHuhSound, playStompSound, playCoinSound, playJumpSound, playDeathSound, playComboSound } from './audio';
+import { playHuhSound, playStompSound, playCoinSound, playJumpSound, playDeathSound, playComboSound, playBrickBreakSound } from './audio';
 
 const GRAVITY = 0.6;
 const JUMP_FORCE = -13;
@@ -181,10 +181,30 @@ function updatePlayer(state: GameState, keys: Keys, dt: number) {
           spawnCoinParticles(state, platform.x + platform.width / 2, platform.y - 20);
           state.screenShake = 2;
         }
-        // Hit brick
+        // Hit brick - SMASH AND BREAK IT!
         if (platform.type === 'brick') {
-          state.screenShake = 1;
-          spawnDustParticles(state, player.x + player.width / 2, platform.y + platform.height);
+          platform.destroyed = true;
+          state.screenShake = 3;
+          state.player.score += 50;
+          playBrickBreakSound();
+          spawnBrickBreakParticles(state, platform.x + platform.width / 2, platform.y + platform.height / 2);
+          spawnHuhText(state, platform.x + platform.width / 2, platform.y - 10, 'SMASH!');
+          
+          // Knock out any mouse patrolling on top of this brick
+          for (const mouse of state.mice) {
+            if (mouse.isAlive &&
+                mouse.x + mouse.width > platform.x &&
+                mouse.x < platform.x + platform.width &&
+                Math.abs((mouse.y + mouse.height) - platform.y) < 15) {
+              mouse.isAlive = false;
+              mouse.squishTimer = 2;
+              state.player.score += 200;
+              state.player.combo++;
+              state.player.comboTimer = 2;
+              spawnStompParticles(state, mouse.x + mouse.width / 2, mouse.y);
+              spawnHuhText(state, mouse.x + mouse.width / 2, mouse.y - 20, 'KO!');
+            }
+          }
         }
       }
       // Side collision
@@ -197,6 +217,11 @@ function updatePlayer(state: GameState, keys: Keys, dt: number) {
         player.vx = 0;
       }
     }
+  }
+  
+  // Clean up destroyed platforms
+  if (state.platforms.some(p => p.destroyed)) {
+    state.platforms = state.platforms.filter(p => !p.destroyed);
   }
   
   // Mouse collision
@@ -489,6 +514,26 @@ function spawnCoinParticles(state: GameState, x: number, y: number) {
       color: '#ffd700',
       size: 14 + Math.random() * 6,
       type: 'coin',
+    });
+  }
+}
+
+function spawnBrickBreakParticles(state: GameState, x: number, y: number) {
+  const colors = ['#39ff88', '#9945ff', '#111728', '#00f0ff', '#ffffff'];
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
+    const speed = 2.5 + Math.random() * 4.5;
+    state.particles.push({
+      x,
+      y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - 2.5,
+      life: 0.7,
+      maxLife: 0.7,
+      color: colors[i % colors.length],
+      size: 6 + Math.random() * 4,
+      type: 'brick',
+      rotation: Math.random() * Math.PI * 2,
     });
   }
 }

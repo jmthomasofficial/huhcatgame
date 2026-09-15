@@ -47,6 +47,7 @@ export interface Platform {
   moveRange?: number;
   originX?: number;
   hit?: boolean;
+  destroyed?: boolean;
   coinCollected?: boolean;
 }
 
@@ -70,7 +71,7 @@ export interface Particle {
   maxLife: number;
   color: string;
   size: number;
-  type: 'huh' | 'star' | 'coin' | 'dust' | 'stomp';
+  type: 'huh' | 'star' | 'coin' | 'dust' | 'stomp' | 'brick';
   text?: string;
   rotation?: number;
 }
