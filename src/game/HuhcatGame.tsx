@@ -530,52 +530,52 @@ export default function HuhcatGame() {
 
           {/* GAME OVER SCREEN */}
           {gameScreen === 'gameover' && (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#04050a]/90 backdrop-blur-md p-6 rounded-xl border border-red-500/30 overflow-hidden">
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-start sm:justify-center bg-[#04050a]/90 backdrop-blur-md p-2.5 sm:p-6 rounded-xl border border-red-500/30 overflow-y-auto sm:overflow-hidden">
               <img
                 src={`${cleanBase}splash.jpg`}
                 alt="HUHCAT"
                 className="absolute inset-0 w-full h-full object-cover object-center opacity-20 blur-sm pointer-events-none"
               />
-              <div className="relative z-10 max-w-sm w-full text-center">
-                <div className="w-20 h-20 mx-auto rounded-full p-1 bg-red-500/20 border-2 border-red-500 mb-3 flex items-center justify-center shadow-[0_0_30px_rgba(255,59,92,0.4)]">
+              <div className="relative z-10 max-w-sm w-full text-center my-auto">
+                <div className="w-14 h-14 sm:w-20 sm:h-20 mx-auto rounded-full p-1 bg-red-500/20 border-2 border-red-500 mb-1.5 sm:mb-3 flex items-center justify-center shadow-[0_0_30px_rgba(255,59,92,0.4)]">
                   <img src={`${cleanBase}cat_dead.png`} alt="Defeated" className="w-full h-full rounded-full object-cover" />
                 </div>
 
-                <h2 className="text-3xl md:text-4xl font-extrabold font-syne text-red-500 mb-1 tracking-tight">
+                <h2 className="text-xl sm:text-3xl md:text-4xl font-extrabold font-syne text-red-500 mb-0.5 sm:mb-1 tracking-tight">
                   MISSION FAILED
                 </h2>
-                <p className="text-xs font-mono text-zinc-400 mb-4">Ben Cat overloaded by robo-mice swarm.</p>
+                <p className="text-[10px] sm:text-xs font-mono text-zinc-400 mb-2 sm:mb-4">Ben Cat overloaded by robo-mice swarm.</p>
 
                 {/* Stat Grid */}
-                <div className="grid grid-cols-2 gap-2 bg-[#0d111c]/90 border border-white/10 rounded-xl p-3 mb-5 font-mono text-xs backdrop-blur-md">
-                  <div className="p-2 bg-black/50 rounded-lg">
+                <div className="grid grid-cols-2 gap-1.5 sm:gap-2 bg-[#0d111c]/90 border border-white/10 rounded-xl p-1.5 sm:p-3 mb-2 sm:mb-5 font-mono text-[10px] sm:text-xs backdrop-blur-md">
+                  <div className="p-1.5 sm:p-2 bg-black/50 rounded-lg">
                     <span className="text-zinc-500 block">FINAL SCORE</span>
-                    <span className="text-lg font-bold text-[#39ff88]">{score}</span>
+                    <span className="text-base sm:text-lg font-bold text-[#39ff88]">{score}</span>
                   </div>
-                  <div className="p-2 bg-black/50 rounded-lg">
+                  <div className="p-1.5 sm:p-2 bg-black/50 rounded-lg">
                     <span className="text-zinc-500 block">DISTANCE</span>
-                    <span className="text-lg font-bold text-purple-400">{Math.floor(gameStateRef.current.distance)}m</span>
+                    <span className="text-base sm:text-lg font-bold text-purple-400">{Math.floor(gameStateRef.current.distance)}m</span>
                   </div>
-                  <div className="p-2 bg-black/50 rounded-lg">
+                  <div className="p-1.5 sm:p-2 bg-black/50 rounded-lg">
                     <span className="text-zinc-500 block">MICE DELETED</span>
-                    <span className="text-lg font-bold text-cyan-400">{gameStateRef.current.mice.filter(m => !m.isAlive).length}</span>
+                    <span className="text-base sm:text-lg font-bold text-cyan-400">{gameStateRef.current.mice.filter(m => !m.isAlive).length}</span>
                   </div>
-                  <div className="p-2 bg-black/50 rounded-lg">
+                  <div className="p-1.5 sm:p-2 bg-black/50 rounded-lg">
                     <span className="text-zinc-500 block">TOTAL "HUH"s</span>
-                    <span className="text-lg font-bold text-yellow-400">{huhCount}</span>
+                    <span className="text-base sm:text-lg font-bold text-yellow-400">{huhCount}</span>
                   </div>
                 </div>
 
                 {score >= highScore && score > 0 && (
-                  <div className="bg-yellow-500/10 border border-yellow-500/30 text-yellow-300 font-mono text-xs py-1.5 px-3 rounded-lg mb-4 animate-pulse">
+                  <div className="bg-yellow-500/10 border border-yellow-500/30 text-yellow-300 font-mono text-[10px] sm:text-xs py-1 sm:py-1.5 px-3 rounded-lg mb-2 sm:mb-4 animate-pulse">
                     🏆 NEW HIGH SCORE RECORD! 🏆
                   </div>
                 )}
 
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-1.5 sm:gap-2">
                   <button
                     onClick={restartGame}
-                    className="w-full py-3 rounded-xl bg-gradient-to-r from-[#39ff88] to-[#00d15c] text-[#001a0a] font-extrabold font-syne text-sm tracking-wider hover:scale-105 active:scale-95 transition-all cursor-pointer shadow-lg"
+                    className="w-full min-h-11 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-[#39ff88] to-[#00d15c] text-[#001a0a] font-extrabold font-syne text-xs sm:text-sm tracking-wider hover:scale-105 active:scale-95 transition-all cursor-pointer shadow-lg"
                   >
                     🔄 RETRY MISSION
                   </button>
@@ -584,7 +584,7 @@ export default function HuhcatGame() {
                     href={TELEGRAM_URL}
                     target="_blank"
                     rel="noreferrer"
-                    className="w-full py-2.5 rounded-xl bg-[#229ed9]/20 hover:bg-[#229ed9]/30 text-[#229ed9] border border-[#229ed9]/40 font-mono text-xs font-bold transition-all text-center"
+                    className="w-full min-h-11 py-2 sm:py-2.5 rounded-xl bg-[#229ed9]/20 hover:bg-[#229ed9]/30 text-[#229ed9] border border-[#229ed9]/40 font-mono text-xs font-bold transition-all text-center flex items-center justify-center"
                   >
                     POST SCORE IN TELEGRAM
                   </a>
