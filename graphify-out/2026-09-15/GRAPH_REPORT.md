@@ -1,16 +1,16 @@
 # Graph Report - huhcatgame  (2026-09-15)
 
 ## Corpus Check
-- 17 files · ~144,619 words
+- 17 files · ~144,651 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 180 nodes · 301 edges · 12 communities (10 shown, 2 thin omitted)
+- 180 nodes · 300 edges · 12 communities (10 shown, 2 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `d5939b5f`
+- Built from commit: `4883f1fe`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -57,7 +57,7 @@
 
 ### Community 0 - "renderer.ts"
 Cohesion: 0.11
-Nodes (32): generateLevel(), seededRandom(), drawOrangie(), drawOrangieBase(), drawOrangieRescue(), getPowerupIcon(), COLORS, drawBackground() (+24 more)
+Nodes (32): generateLevel(), seededRandom(), drawOrangie(), drawOrangieCutsceneSprite(), drawOrangieRescue(), getPowerupIcon(), COLORS, drawBackground() (+24 more)
 
 ### Community 1 - "dependencies"
 Cohesion: 0.07
@@ -98,11 +98,11 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `dependencies` connect `dependencies` to `devDependencies`?**
   _High betweenness centrality (0.064) - this node is a cross-community bridge._
 - **Why does `render()` connect `renderer.ts` to `audio.ts`?**
-  _High betweenness centrality (0.017) - this node is a cross-community bridge._
+  _High betweenness centrality (0.016) - this node is a cross-community bridge._
 - **What connects `name`, `private`, `type` to the rest of the system?**
   _56 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `renderer.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.10952380952380952 - nodes in this community are weakly interconnected._
 - **Should `dependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.07407407407407407 - nodes in this community are weakly interconnected._
 - **Should `devDependencies` be split into smaller, more focused modules?**

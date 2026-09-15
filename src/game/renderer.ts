@@ -58,7 +58,7 @@ export function render(ctx: CanvasRenderingContext2D, state: GameState, canvasWi
   // 3.5 Draw Orangie NPCs
   state.orangies.forEach(o => {
     if ((!o.collected || o.flyingAway) && o.x + o.width > camera.x - 100 && o.x < camera.x + canvasWidth + 100) {
-      drawOrangie(ctx, o, camera, state.time);
+      drawOrangie(ctx, o, camera, state.time, state.player.x);
     }
   });
   

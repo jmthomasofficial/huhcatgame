@@ -25,6 +25,7 @@
 12. **4 difficulty zones** with themed platform colors (green → purple → red → gold)
 13. **Seeded level generation** — Reproducible levels, seed displayed on game over with copy button
 14. **Powerup HUD** — Active powerup badge with countdown timer
+15. **Refined Orangie Sprite Alignment** — Authentic 3/4 perspective with big chubby white face in the front (85% of head silhouette), soft peach cheek blush, sky blue rear skull plumage, wide knit orange ribbed beanie with green pom-pom, black hoodie with green & white drawstring aglets, and dynamic facing towards oncoming Ben Cat.
 
 ### Files Modified
 - `src/game/types.ts` — All new types (Orangie, PowerupType, expanded Player/GameState)
