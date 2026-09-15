@@ -1,12 +1,27 @@
 @import "tailwindcss";
 
+:root {
+  --bg: #04050a;
+  --bg2: #0a0d16;
+  --panel: #0d111c;
+  --panel-b: rgba(255, 255, 255, 0.08);
+  --green: #39ff88;
+  --green-d: #00d15c;
+  --purple: #9945ff;
+  --red: #ff3b5c;
+  --text: #eef2f6;
+  --muted: #8a93a6;
+}
+
 html, body, #root {
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #0a001a;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 * {
@@ -21,21 +36,57 @@ canvas {
   touch-action: none;
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+.font-syne {
+  font-family: 'Syne', sans-serif;
 }
 
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
+.font-mono {
+  font-family: 'Space Mono', monospace;
+}
+
+.font-body {
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.grad-text {
+  background: linear-gradient(90deg, #39ff88, #9dffc7 40%, #9945ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.grad-text-gold {
+  background: linear-gradient(90deg, #ffd700, #ffae00);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.cyber-grid {
+  background-image:
+    linear-gradient(rgba(57, 255, 136, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(57, 255, 136, 0.05) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(57, 255, 136, 0.4), inset 0 0 15px rgba(57, 255, 136, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(57, 255, 136, 0.7), inset 0 0 25px rgba(57, 255, 136, 0.35);
+  }
+}
+
+.pulse-emerald {
+  animation: pulse-glow 2s infinite ease-in-out;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
 }
 
 .animate-float {
   animation: float 3s ease-in-out infinite;
-}
-
-.animate-shake {
-  animation: shake 0.5s ease-in-out;
 }

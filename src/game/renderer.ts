@@ -1,128 +1,148 @@
 import { GameState, Player, Mouse, Platform, Coin, Particle, HuhText } from './types';
 
+// Pre-load authentic Ben Cat sprites
+const baseUrl = import.meta.env.BASE_URL || '/';
+const cleanBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+
+const spriteIdle = new Image();
+spriteIdle.src = `${cleanBase}cat_idle.png`;
+
+const spriteHuh = new Image();
+spriteHuh.src = `${cleanBase}cat_huh.png`;
+
+const spriteDead = new Image();
+spriteDead.src = `${cleanBase}cat_dead.png`;
+
 const COLORS = {
-  sky: ['#1a0533', '#2d1b69', '#4a2c8a', '#6b3fa0'],
-  ground: '#4a2800',
-  groundTop: '#6b8c23',
-  brick: '#c84c0c',
-  brickDark: '#8b3000',
-  question: '#ffd700',
-  questionDark: '#cc9900',
-  cloud: '#ffffff',
-  cat: '#ff8c00',
-  catDark: '#cc6600',
-  catLight: '#ffb347',
-  mouse: '#888888',
-  mouseDark: '#555555',
-  mouseEye: '#ff0000',
-  coin: '#ffd700',
-  coinGolden: '#ff6600',
+  bgVoid: '#04050a',
+  bgPanel: '#0d111c',
+  green: '#39ff88',
+  greenDim: '#00d15c',
+  purple: '#9945ff',
+  purpleDim: '#7025d9',
+  red: '#ff3b5c',
+  gold: '#ffd700',
+  cyan: '#00f0ff',
+  text: '#eef2f6',
+  muted: '#8a93a6',
 };
 
 export function render(ctx: CanvasRenderingContext2D, state: GameState, canvasWidth: number, canvasHeight: number) {
   const { camera, screenShake } = state;
   
   // Apply screen shake
-  const shakeX = screenShake > 0 ? (Math.random() - 0.5) * screenShake * 4 : 0;
-  const shakeY = screenShake > 0 ? (Math.random() - 0.5) * screenShake * 4 : 0;
+  const shakeX = screenShake > 0 ? (Math.random() - 0.5) * screenShake * 5 : 0;
+  const shakeY = screenShake > 0 ? (Math.random() - 0.5) * screenShake * 5 : 0;
   
   ctx.save();
   ctx.translate(shakeX, shakeY);
   
-  // Draw background
+  // 1. Draw Cyberpunk Solana Background
   drawBackground(ctx, camera, canvasWidth, canvasHeight, state.time);
   
-  // Draw platforms
+  // 2. Draw Platforms (Cyber Alloy + Neon Emerald / Solana Purple)
   state.platforms.forEach(p => {
     if (p.x + p.width > camera.x - 100 && p.x < camera.x + canvasWidth + 100) {
       drawPlatform(ctx, p, camera);
     }
   });
   
-  // Draw coins
+  // 3. Draw Collectibles (Solana Gold Coins & Holographic Fish)
   state.coins.forEach(c => {
     if (!c.collected && c.x + c.width > camera.x - 50 && c.x < camera.x + canvasWidth + 50) {
       drawCoin(ctx, c, camera);
     }
   });
   
-  // Draw mice
+  // 4. Draw Robo-Mice Enemies
   state.mice.forEach(m => {
     if (m.x + m.width > camera.x - 50 && m.x < camera.x + canvasWidth + 50) {
       drawMouse(ctx, m, camera);
     }
   });
   
-  // Draw player
-  drawPlayer(ctx, state.player, camera);
+  // 5. Draw Player with authentic Ben Cat Sprite
+  drawPlayer(ctx, state.player, camera, state.gameOver);
   
-  // Draw particles
+  // 6. Draw Sparks & Particles
   state.particles.forEach(p => drawParticle(ctx, p, camera));
   
-  // Draw HUH texts
+  // 7. Draw Iconic HUH?! Floating Badges
   state.huhTexts.forEach(h => drawHuhText(ctx, h, camera));
   
-  // Draw HUD
+  // 8. Draw Modernized Cyber HUD
   drawHUD(ctx, state, canvasWidth);
   
   ctx.restore();
 }
 
 function drawBackground(ctx: CanvasRenderingContext2D, camera: { x: number; y: number }, w: number, h: number, time: number) {
-  // Gradient sky
-  const gradient = ctx.createLinearGradient(0, 0, 0, h);
-  gradient.addColorStop(0, '#0a001a');
-  gradient.addColorStop(0.3, '#1a0533');
-  gradient.addColorStop(0.6, '#2d1b69');
-  gradient.addColorStop(1, '#4a2c8a');
-  ctx.fillStyle = gradient;
+  // Deep space cyber gradient
+  const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
+  bgGrad.addColorStop(0, '#04050a');
+  bgGrad.addColorStop(0.4, '#070a14');
+  bgGrad.addColorStop(0.8, '#0b0d1e');
+  bgGrad.addColorStop(1, '#120b24');
+  ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, w, h);
   
-  // Stars (parallax)
+  // Cyber grid horizon
+  ctx.save();
+  ctx.strokeStyle = 'rgba(57, 255, 136, 0.07)';
+  ctx.lineWidth = 1;
+  const gridStep = 40;
+  const camShiftX = (camera.x * 0.15) % gridStep;
+  for (let x = -camShiftX; x <= w; x += gridStep) {
+    ctx.beginPath();
+    ctx.moveTo(x, h * 0.45);
+    ctx.lineTo(x * 1.5 - w * 0.25, h);
+    ctx.stroke();
+  }
+  for (let y = h * 0.45; y <= h; y += 28) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // Distant Stars & Solana Constellation
   ctx.fillStyle = '#ffffff';
-  for (let i = 0; i < 60; i++) {
-    const sx = ((i * 137 + 50) % w + (camera.x * 0.05) % w + w) % w;
-    const sy = ((i * 97 + 30) % (h * 0.6));
-    const size = (i % 3) + 1;
-    const twinkle = Math.sin(time * 3 + i) * 0.3 + 0.7;
-    ctx.globalAlpha = twinkle;
+  for (let i = 0; i < 70; i++) {
+    const sx = ((i * 137 + 50) % w + (camera.x * 0.04) % w + w) % w;
+    const sy = ((i * 97 + 30) % (h * 0.55));
+    const size = (i % 3) === 0 ? 2 : 1;
+    const isSolana = i % 8 === 0;
+    const isEmerald = i % 11 === 0;
+    
+    ctx.globalAlpha = Math.sin(time * 2.5 + i) * 0.4 + 0.6;
+    ctx.fillStyle = isSolana ? '#9945ff' : isEmerald ? '#39ff88' : '#eef2f6';
     ctx.fillRect(sx, sy, size, size);
   }
   ctx.globalAlpha = 1;
   
-  // Far mountains (parallax)
-  ctx.fillStyle = '#1a0a3a';
+  // Distant Cyber Skyline Silhouette
+  ctx.fillStyle = 'rgba(8, 12, 24, 0.85)';
   ctx.beginPath();
   ctx.moveTo(0, h);
-  for (let x = 0; x <= w; x += 20) {
-    const worldX = x + camera.x * 0.1;
-    const mountainY = h - 150 + Math.sin(worldX * 0.003) * 60 + Math.sin(worldX * 0.007) * 30;
-    ctx.lineTo(x, mountainY);
+  for (let x = 0; x <= w; x += 30) {
+    const worldX = x + camera.x * 0.08;
+    const bHeight = 80 + (Math.sin(worldX * 0.015) * 40 + Math.sin(worldX * 0.04) * 20);
+    ctx.lineTo(x, h - bHeight);
+    ctx.lineTo(x + 25, h - bHeight);
   }
   ctx.lineTo(w, h);
   ctx.fill();
   
-  // Near mountains
-  ctx.fillStyle = '#2a1050';
-  ctx.beginPath();
-  ctx.moveTo(0, h);
-  for (let x = 0; x <= w; x += 15) {
-    const worldX = x + camera.x * 0.2;
-    const mountainY = h - 100 + Math.sin(worldX * 0.005) * 50 + Math.sin(worldX * 0.012) * 20;
-    ctx.lineTo(x, mountainY);
-  }
-  ctx.lineTo(w, h);
-  ctx.fill();
-  
-  // Floating crypto symbols in background
-  ctx.globalAlpha = 0.15;
-  ctx.font = '20px monospace';
-  ctx.fillStyle = '#ffd700';
-  const symbols = ['⟠', '◈', '⬡', '◇', '△'];
-  for (let i = 0; i < 10; i++) {
-    const sx = ((i * 200 + camera.x * 0.3) % (w + 200)) - 100;
-    const sy = 100 + (i * 73) % 300 + Math.sin(time + i) * 20;
-    ctx.fillText(symbols[i % symbols.length], sx, sy);
+  // Floating On-Chain Lore Runes in background
+  ctx.globalAlpha = 0.12;
+  ctx.font = 'bold 16px "Space Mono", monospace';
+  ctx.fillStyle = COLORS.green;
+  const runes = ['$HUHCAT', 'SOL', 'V1', '0xCAT', 'INSCRIPTION', 'PUMP', '3.2M'];
+  for (let i = 0; i < runes.length; i++) {
+    const sx = ((i * 180 + camera.x * 0.2) % (w + 200)) - 100;
+    const sy = 80 + (i * 65) % (h * 0.4) + Math.sin(time + i) * 15;
+    ctx.fillText(runes[i], sx, sy);
   }
   ctx.globalAlpha = 1;
 }
@@ -133,84 +153,120 @@ function drawPlatform(ctx: CanvasRenderingContext2D, p: Platform, camera: { x: n
   
   switch (p.type) {
     case 'ground':
-      // Ground block
-      ctx.fillStyle = COLORS.groundTop;
-      ctx.fillRect(x, y, p.width, 8);
-      ctx.fillStyle = COLORS.ground;
-      ctx.fillRect(x, y + 8, p.width, p.height - 8);
-      // Dirt texture
-      ctx.fillStyle = '#5a3800';
-      for (let i = 0; i < p.width; i += 20) {
-        ctx.fillRect(x + i + 5, y + 15, 6, 4);
-        ctx.fillRect(x + i + 12, y + 25, 4, 3);
+      // Cyber Alloy Ground with Glowing Neon Emerald Top Border
+      ctx.fillStyle = '#0d111c';
+      ctx.fillRect(x, y, p.width, p.height);
+      
+      // Neon Emerald Top Rail
+      ctx.fillStyle = COLORS.green;
+      ctx.fillRect(x, y, p.width, 4);
+      
+      // Top Rail Glow
+      ctx.shadowColor = COLORS.green;
+      ctx.shadowBlur = 8;
+      ctx.fillStyle = 'rgba(57, 255, 136, 0.4)';
+      ctx.fillRect(x, y, p.width, 2);
+      ctx.shadowBlur = 0;
+      
+      // Circuit tech accents
+      ctx.strokeStyle = 'rgba(57, 255, 136, 0.12)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < p.width; i += 40) {
+        ctx.strokeRect(x + i + 4, y + 10, 32, p.height - 18);
+        ctx.fillStyle = 'rgba(57, 255, 136, 0.2)';
+        ctx.fillRect(x + i + 8, y + 14, 4, 4);
       }
       break;
       
     case 'brick':
-      ctx.fillStyle = COLORS.brick;
+      // Tech Server Block
+      ctx.fillStyle = '#111728';
       ctx.fillRect(x, y, p.width, p.height);
-      ctx.fillStyle = COLORS.brickDark;
-      ctx.strokeStyle = COLORS.brickDark;
-      ctx.lineWidth = 1;
-      // Brick pattern
+      ctx.strokeStyle = 'rgba(57, 255, 136, 0.35)';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(x + 1, y + 1, p.width - 2, p.height - 2);
+      
+      // Inner glowing lines
       for (let bx = 0; bx < p.width; bx += 20) {
-        for (let by = 0; by < p.height; by += 10) {
-          const offset = (by / 10) % 2 === 0 ? 0 : 10;
-          ctx.strokeRect(x + bx + offset, y + by, 20, 10);
-        }
+        ctx.strokeStyle = 'rgba(153, 69, 255, 0.25)';
+        ctx.beginPath();
+        ctx.moveTo(x + bx, y);
+        ctx.lineTo(x + bx, y + p.height);
+        ctx.stroke();
       }
-      // Highlight
-      ctx.fillStyle = 'rgba(255,255,255,0.1)';
-      ctx.fillRect(x, y, p.width, 3);
+      // Top Edge Specular
+      ctx.fillStyle = 'rgba(57, 255, 136, 0.6)';
+      ctx.fillRect(x, y, p.width, 2);
       break;
       
     case 'question':
-      const bounce = p.hit ? 0 : Math.sin(Date.now() * 0.005) * 2;
-      ctx.fillStyle = p.hit ? '#8b6914' : COLORS.question;
+      // Solana Mystery Box
+      const bounce = p.hit ? 0 : Math.sin(Date.now() * 0.006) * 2;
+      ctx.fillStyle = p.hit ? '#1a1f2e' : '#1b1233';
       ctx.fillRect(x, y + bounce, p.width, p.height);
-      ctx.fillStyle = p.hit ? '#5a4510' : COLORS.questionDark;
-      ctx.strokeStyle = p.hit ? '#5a4510' : COLORS.questionDark;
+      
+      // Purple / Gold Border
+      ctx.strokeStyle = p.hit ? '#334155' : COLORS.gold;
       ctx.lineWidth = 2;
-      ctx.strokeRect(x + 2, y + 2 + bounce, p.width - 4, p.height - 4);
+      ctx.strokeRect(x + 1, y + 1 + bounce, p.width - 2, p.height - 2);
+      
       if (!p.hit) {
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 20px Arial';
+        // Glowing Solana 'S' or '?'
+        ctx.shadowColor = COLORS.gold;
+        ctx.shadowBlur = 10;
+        ctx.fillStyle = COLORS.gold;
+        ctx.font = 'bold 20px "Space Mono", monospace';
         ctx.textAlign = 'center';
-        ctx.fillText('?', x + p.width / 2, y + p.height / 2 + 7 + bounce);
-        // Shine
-        ctx.fillStyle = 'rgba(255,255,255,0.3)';
-        ctx.fillRect(x + 4, y + 4 + bounce, 8, 8);
+        ctx.fillText('S', x + p.width / 2, y + p.height / 2 + 7 + bounce);
+        ctx.shadowBlur = 0;
+        
+        // Corner rivets
+        ctx.fillStyle = COLORS.purple;
+        ctx.fillRect(x + 4, y + 4 + bounce, 3, 3);
+        ctx.fillRect(x + p.width - 7, y + 4 + bounce, 3, 3);
+        ctx.fillRect(x + 4, y + p.height - 7 + bounce, 3, 3);
+        ctx.fillRect(x + p.width - 7, y + p.height - 7 + bounce, 3, 3);
       }
       break;
       
     case 'moving':
-      ctx.fillStyle = '#4488ff';
+      // Moving Tech Platform
+      ctx.fillStyle = '#0f172a';
       ctx.fillRect(x, y, p.width, p.height);
-      ctx.fillStyle = '#66aaff';
-      ctx.fillRect(x, y, p.width, 4);
-      ctx.fillStyle = '#2266cc';
-      ctx.fillRect(x, y + p.height - 4, p.width, 4);
-      // Arrow indicators
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '12px Arial';
+      ctx.strokeStyle = COLORS.cyan;
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(x, y, p.width, p.height);
+      
+      // Pulse arrows
+      ctx.fillStyle = COLORS.cyan;
+      ctx.font = 'bold 12px "Space Mono", monospace';
       ctx.textAlign = 'center';
       ctx.fillText('◄►', x + p.width / 2, y + p.height / 2 + 4);
       break;
       
     case 'cloud':
-      ctx.fillStyle = 'rgba(255,255,255,0.9)';
-      ctx.beginPath();
+      // Solana Purple Nebula Jump Pad
+      ctx.save();
       const cx = x + p.width / 2;
       const cy = y + p.height / 2;
-      ctx.ellipse(cx, cy, p.width / 2, p.height / 2 + 5, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      
+      ctx.shadowColor = COLORS.purple;
+      ctx.shadowBlur = 14;
+      ctx.fillStyle = 'rgba(153, 69, 255, 0.45)';
       ctx.beginPath();
-      ctx.ellipse(cx - 10, cy - 5, 15, 12, 0, 0, Math.PI * 2);
+      ctx.ellipse(cx, cy, p.width / 2, p.height / 2 + 4, 0, 0, Math.PI * 2);
       ctx.fill();
+      
+      ctx.strokeStyle = COLORS.purple;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
       ctx.beginPath();
-      ctx.ellipse(cx + 12, cy - 3, 12, 10, 0, 0, Math.PI * 2);
+      ctx.ellipse(cx - 8, cy - 3, 10, 6, 0, 0, Math.PI * 2);
       ctx.fill();
+      ctx.restore();
       break;
   }
 }
@@ -221,26 +277,27 @@ function drawMouse(ctx: CanvasRenderingContext2D, m: Mouse, camera: { x: number;
   
   if (!m.isAlive) {
     if (m.squishTimer > 0) {
-      // Squished mouse
-      ctx.fillStyle = COLORS.mouse;
-      ctx.fillRect(x, y + m.height - 8, m.width, 8);
-      ctx.fillStyle = '#ff0000';
-      ctx.font = '10px Arial';
-      ctx.fillText('X_X', x + 4, y + m.height - 2);
+      // Squished robotic chassis with spark
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(x, y + m.height - 7, m.width, 7);
+      ctx.fillStyle = COLORS.red;
+      ctx.font = 'bold 10px "Space Mono", monospace';
+      ctx.fillText('DELETED', x, y + m.height - 2);
     }
     return;
   }
   
-  const bobY = Math.sin(m.frameTimer * 0.2) * 2;
+  const bobY = Math.sin(m.frameTimer * 0.25) * 2;
   
-  // Body
-  ctx.fillStyle = m.type === 'big' ? '#666' : COLORS.mouse;
+  ctx.save();
+  // Cyber Mech Body
+  ctx.fillStyle = m.type === 'big' ? '#1e293b' : '#334155';
   ctx.beginPath();
   ctx.ellipse(x + m.width / 2, y + m.height / 2 + bobY, m.width / 2, m.height / 2, 0, 0, Math.PI * 2);
   ctx.fill();
   
-  // Ears
-  ctx.fillStyle = m.type === 'big' ? '#555' : COLORS.mouseDark;
+  // Mechanical Ears
+  ctx.fillStyle = m.type === 'big' ? '#0f172a' : '#1e293b';
   ctx.beginPath();
   ctx.ellipse(x + m.width * 0.3, y + 2 + bobY, 6, 8, -0.3, 0, Math.PI * 2);
   ctx.fill();
@@ -248,149 +305,113 @@ function drawMouse(ctx: CanvasRenderingContext2D, m: Mouse, camera: { x: number;
   ctx.ellipse(x + m.width * 0.7, y + 2 + bobY, 6, 8, 0.3, 0, Math.PI * 2);
   ctx.fill();
   
-  // Inner ears
-  ctx.fillStyle = '#ffaaaa';
-  ctx.beginPath();
-  ctx.ellipse(x + m.width * 0.3, y + 4 + bobY, 3, 5, -0.3, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.ellipse(x + m.width * 0.7, y + 4 + bobY, 3, 5, 0.3, 0, Math.PI * 2);
-  ctx.fill();
+  // Glowing Red Laser Visor / Eyes
+  ctx.shadowColor = COLORS.red;
+  ctx.shadowBlur = 8;
+  ctx.fillStyle = COLORS.red;
+  ctx.fillRect(x + m.width * 0.25, y + m.height * 0.35 + bobY, m.width * 0.5, 4);
+  ctx.shadowBlur = 0;
   
-  // Eyes (angry red for big mice)
-  ctx.fillStyle = m.type === 'big' ? '#ff0000' : '#000';
-  ctx.beginPath();
-  ctx.arc(x + m.width * 0.35, y + m.height * 0.4 + bobY, m.type === 'big' ? 4 : 3, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(x + m.width * 0.65, y + m.height * 0.4 + bobY, m.type === 'big' ? 4 : 3, 0, Math.PI * 2);
-  ctx.fill();
-  
-  // Eye shine
-  ctx.fillStyle = '#fff';
-  ctx.beginPath();
-  ctx.arc(x + m.width * 0.35 + 1, y + m.height * 0.35 + bobY, 1.5, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(x + m.width * 0.65 + 1, y + m.height * 0.35 + bobY, 1.5, 0, Math.PI * 2);
-  ctx.fill();
-  
-  // Nose
-  ctx.fillStyle = '#ff6699';
-  ctx.beginPath();
-  ctx.arc(x + m.width / 2, y + m.height * 0.55 + bobY, 2, 0, Math.PI * 2);
-  ctx.fill();
-  
-  // Whiskers
-  ctx.strokeStyle = '#333';
-  ctx.lineWidth = 0.5;
-  ctx.beginPath();
-  ctx.moveTo(x + m.width * 0.3, y + m.height * 0.55 + bobY);
-  ctx.lineTo(x - 5, y + m.height * 0.5 + bobY);
-  ctx.moveTo(x + m.width * 0.3, y + m.height * 0.6 + bobY);
-  ctx.lineTo(x - 5, y + m.height * 0.65 + bobY);
-  ctx.moveTo(x + m.width * 0.7, y + m.height * 0.55 + bobY);
-  ctx.lineTo(x + m.width + 5, y + m.height * 0.5 + bobY);
-  ctx.moveTo(x + m.width * 0.7, y + m.height * 0.6 + bobY);
-  ctx.lineTo(x + m.width + 5, y + m.height * 0.65 + bobY);
-  ctx.stroke();
-  
-  // Tail
-  ctx.strokeStyle = '#ff9999';
-  ctx.lineWidth = 2;
+  // Electric Tail
+  ctx.strokeStyle = COLORS.green;
+  ctx.lineWidth = 1.5;
   ctx.beginPath();
   ctx.moveTo(x + m.width, y + m.height * 0.7 + bobY);
-  ctx.quadraticCurveTo(x + m.width + 15, y + m.height * 0.5 + bobY + Math.sin(m.frameTimer * 0.3) * 5, x + m.width + 10, y + m.height * 0.3 + bobY);
+  ctx.quadraticCurveTo(
+    x + m.width + 12,
+    y + m.height * 0.5 + bobY + Math.sin(m.frameTimer * 0.3) * 6,
+    x + m.width + 8,
+    y + m.height * 0.2 + bobY
+  );
   ctx.stroke();
   
-  // Speed lines for fast mice
-  if (m.type === 'fast') {
-    ctx.strokeStyle = 'rgba(255,255,0,0.5)';
-    ctx.lineWidth = 1;
-    for (let i = 0; i < 3; i++) {
-      ctx.beginPath();
-      ctx.moveTo(x + m.width + 5, y + 5 + i * 7 + bobY);
-      ctx.lineTo(x + m.width + 15 + Math.random() * 5, y + 5 + i * 7 + bobY);
-      ctx.stroke();
-    }
-  }
-  
-  // Crown for big mice
+  // Boss Crown for Big Mech
   if (m.type === 'big') {
-    ctx.fillStyle = '#ffd700';
+    ctx.fillStyle = COLORS.gold;
+    ctx.shadowColor = COLORS.gold;
+    ctx.shadowBlur = 6;
     ctx.beginPath();
-    ctx.moveTo(x + m.width * 0.25, y - 2 + bobY);
-    ctx.lineTo(x + m.width * 0.35, y - 10 + bobY);
-    ctx.lineTo(x + m.width * 0.45, y - 4 + bobY);
-    ctx.lineTo(x + m.width * 0.55, y - 12 + bobY);
-    ctx.lineTo(x + m.width * 0.65, y - 4 + bobY);
-    ctx.lineTo(x + m.width * 0.75, y - 10 + bobY);
-    ctx.lineTo(x + m.width * 0.85, y - 2 + bobY);
+    ctx.moveTo(x + m.width * 0.2, y - 2 + bobY);
+    ctx.lineTo(x + m.width * 0.35, y - 11 + bobY);
+    ctx.lineTo(x + m.width * 0.5, y - 4 + bobY);
+    ctx.lineTo(x + m.width * 0.65, y - 11 + bobY);
+    ctx.lineTo(x + m.width * 0.8, y - 2 + bobY);
+    ctx.closePath();
     ctx.fill();
+    ctx.shadowBlur = 0;
   }
+  ctx.restore();
 }
 
 function drawCoin(ctx: CanvasRenderingContext2D, c: Coin, camera: { x: number; y: number }) {
   const x = c.x - camera.x;
   const y = c.y - camera.y;
-  const bob = Math.sin(Date.now() * 0.004 + c.x) * 3;
+  const bob = Math.sin(Date.now() * 0.005 + c.x) * 4;
   
   if (c.type === 'golden') {
-    // Golden coin (Solana themed)
-    ctx.fillStyle = '#ff6600';
+    // Solana Golden Coin
+    ctx.save();
+    ctx.shadowColor = COLORS.green;
+    ctx.shadowBlur = 12;
+    
+    // Outer Coin
+    const grad = ctx.createLinearGradient(x, y + bob, x + 20, y + 20 + bob);
+    grad.addColorStop(0, '#39ff88');
+    grad.addColorStop(1, '#9945ff');
+    ctx.fillStyle = grad;
     ctx.beginPath();
-    ctx.arc(x + 10, y + 10 + bob, 10, 0, Math.PI * 2);
+    ctx.arc(x + 10, y + 10 + bob, 11, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = '#ff9933';
+    
+    // Inner Coin
+    ctx.fillStyle = '#0d111c';
     ctx.beginPath();
-    ctx.arc(x + 10, y + 10 + bob, 7, 0, Math.PI * 2);
+    ctx.arc(x + 10, y + 10 + bob, 8.5, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 10px Arial';
+    
+    // Solana S
+    ctx.fillStyle = COLORS.green;
+    ctx.font = 'bold 11px "Space Mono", monospace';
     ctx.textAlign = 'center';
     ctx.fillText('S', x + 10, y + 14 + bob);
-    // Glow
-    ctx.shadowColor = '#ff6600';
-    ctx.shadowBlur = 10;
-    ctx.beginPath();
-    ctx.arc(x + 10, y + 10 + bob, 10, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.shadowBlur = 0;
+    ctx.restore();
   } else {
-    // Fish coin
-    ctx.fillStyle = '#44bbff';
-    ctx.beginPath();
-    const fishBob = bob;
+    // Holographic Cyber Fish
+    ctx.save();
+    ctx.shadowColor = COLORS.cyan;
+    ctx.shadowBlur = 8;
+    ctx.fillStyle = COLORS.cyan;
+    
     // Fish body
-    ctx.ellipse(x + 10, y + 10 + fishBob, 9, 6, 0, 0, Math.PI * 2);
+    ctx.beginPath();
+    ctx.ellipse(x + 10, y + 10 + bob, 10, 6, 0, 0, Math.PI * 2);
     ctx.fill();
+    
     // Fish tail
     ctx.beginPath();
-    ctx.moveTo(x + 18, y + 10 + fishBob);
-    ctx.lineTo(x + 24, y + 5 + fishBob);
-    ctx.lineTo(x + 24, y + 15 + fishBob);
+    ctx.moveTo(x + 18, y + 10 + bob);
+    ctx.lineTo(x + 24, y + 5 + bob);
+    ctx.lineTo(x + 24, y + 15 + bob);
     ctx.closePath();
     ctx.fill();
-    // Fish eye
-    ctx.fillStyle = '#000';
+    
+    // Fish neon eye
+    ctx.fillStyle = '#04050a';
     ctx.beginPath();
-    ctx.arc(x + 6, y + 9 + fishBob, 2, 0, Math.PI * 2);
+    ctx.arc(x + 6, y + 9 + bob, 2, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.arc(x + 5.5, y + 8.5 + fishBob, 1, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.restore();
   }
 }
 
-function drawPlayer(ctx: CanvasRenderingContext2D, player: Player, camera: { x: number; y: number }) {
+function drawPlayer(ctx: CanvasRenderingContext2D, player: Player, camera: { x: number; y: number }, gameOver: boolean) {
   const x = player.x - camera.x;
   const y = player.y - camera.y;
   const flip = player.facing === 'left';
   
   // Invincibility flash
   if (player.invincible > 0 && Math.floor(player.invincible * 10) % 2 === 0) {
-    ctx.globalAlpha = 0.5;
+    ctx.globalAlpha = 0.45;
   }
   
   ctx.save();
@@ -404,136 +425,69 @@ function drawPlayer(ctx: CanvasRenderingContext2D, player: Player, camera: { x: 
   const w = player.width;
   const h = player.height;
   const squish = player.isStomping ? 0.8 : 1;
-  const stretch = player.isJumping ? 1.1 : 1;
+  const stretch = player.isJumping ? 1.15 : 1;
   
-  // Shadow
-  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  // Ground Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.5)';
   ctx.beginPath();
   ctx.ellipse(w / 2, h + 2, w * 0.4, 4, 0, 0, Math.PI * 2);
   ctx.fill();
   
-  // Body
-  ctx.fillStyle = COLORS.cat;
-  ctx.beginPath();
-  ctx.ellipse(w / 2, h * 0.6, w * 0.4 * squish, h * 0.35 * stretch, 0, 0, Math.PI * 2);
-  ctx.fill();
+  // Select Sprite: Dead -> Huh (Jump/Stomp) -> Idle
+  let activeSprite: HTMLImageElement | null = null;
+  if (gameOver) {
+    activeSprite = spriteDead;
+  } else if (player.isJumping || player.isStomping) {
+    activeSprite = spriteHuh;
+  } else {
+    activeSprite = spriteIdle;
+  }
   
-  // Head
-  ctx.fillStyle = COLORS.cat;
-  ctx.beginPath();
-  ctx.arc(w / 2, h * 0.3, w * 0.35, 0, Math.PI * 2);
-  ctx.fill();
+  const isSpriteReady = activeSprite && activeSprite.complete && activeSprite.naturalWidth > 0;
   
-  // Ears
-  ctx.fillStyle = COLORS.catDark;
-  ctx.beginPath();
-  ctx.moveTo(w * 0.2, h * 0.15);
-  ctx.lineTo(w * 0.1, h * -0.05);
-  ctx.lineTo(w * 0.35, h * 0.1);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(w * 0.8, h * 0.15);
-  ctx.lineTo(w * 0.9, h * -0.05);
-  ctx.lineTo(w * 0.65, h * 0.1);
-  ctx.fill();
-  
-  // Inner ears
-  ctx.fillStyle = '#ffaaaa';
-  ctx.beginPath();
-  ctx.moveTo(w * 0.22, h * 0.15);
-  ctx.lineTo(w * 0.15, h * 0.0);
-  ctx.lineTo(w * 0.32, h * 0.12);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(w * 0.78, h * 0.15);
-  ctx.lineTo(w * 0.85, h * 0.0);
-  ctx.lineTo(w * 0.68, h * 0.12);
-  ctx.fill();
-  
-  // Face - THE ICONIC HUH FACE
-  // Eyes (wide, confused)
-  ctx.fillStyle = '#fff';
-  ctx.beginPath();
-  ctx.ellipse(w * 0.35, h * 0.28, 7, 8, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.ellipse(w * 0.65, h * 0.28, 7, 8, 0, 0, Math.PI * 2);
-  ctx.fill();
-  
-  // Pupils (looking confused/up)
-  ctx.fillStyle = '#000';
-  const pupilOffY = player.isJumping ? -2 : 0;
-  ctx.beginPath();
-  ctx.arc(w * 0.37, h * 0.28 + pupilOffY, 4, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(w * 0.67, h * 0.28 + pupilOffY, 4, 0, Math.PI * 2);
-  ctx.fill();
-  
-  // Eye shine
-  ctx.fillStyle = '#fff';
-  ctx.beginPath();
-  ctx.arc(w * 0.35, h * 0.26 + pupilOffY, 2, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(w * 0.65, h * 0.26 + pupilOffY, 2, 0, Math.PI * 2);
-  ctx.fill();
-  
-  // Confused eyebrows
-  ctx.strokeStyle = COLORS.catDark;
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(w * 0.22, h * 0.18);
-  ctx.lineTo(w * 0.42, h * 0.22);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(w * 0.78, h * 0.22);
-  ctx.lineTo(w * 0.58, h * 0.18);
-  ctx.stroke();
-  
-  // Mouth (confused "o" shape - the HUH expression)
-  ctx.fillStyle = '#333';
-  ctx.beginPath();
-  ctx.ellipse(w * 0.5, h * 0.4, 5, 6, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = '#ff6666';
-  ctx.beginPath();
-  ctx.ellipse(w * 0.5, h * 0.41, 3, 4, 0, 0, Math.PI * 2);
-  ctx.fill();
-  
-  // Whiskers
-  ctx.strokeStyle = '#333';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(w * 0.2, h * 0.35);
-  ctx.lineTo(w * 0.0, h * 0.32);
-  ctx.moveTo(w * 0.2, h * 0.4);
-  ctx.lineTo(w * 0.0, h * 0.42);
-  ctx.moveTo(w * 0.8, h * 0.35);
-  ctx.lineTo(w * 1.0, h * 0.32);
-  ctx.moveTo(w * 0.8, h * 0.4);
-  ctx.lineTo(w * 1.0, h * 0.42);
-  ctx.stroke();
-  
-  // Tail
-  ctx.strokeStyle = COLORS.catDark;
-  ctx.lineWidth = 4;
-  ctx.lineCap = 'round';
-  ctx.beginPath();
-  ctx.moveTo(w * 0.1, h * 0.6);
-  const tailWag = Math.sin(Date.now() * 0.008) * 10;
-  ctx.quadraticCurveTo(w * -0.2, h * 0.4 + tailWag, w * -0.1, h * 0.2 + tailWag);
-  ctx.stroke();
-  
-  // Feet
-  ctx.fillStyle = COLORS.catDark;
-  const walkCycle = Math.sin(player.frameTimer * 0.3) * 3;
-  if (!player.isJumping) {
+  if (isSpriteReady) {
+    // Draw authentic Ben Cat Medallion
+    ctx.save();
+    
+    // Attack streak when stomping
+    if (player.isStomping) {
+      ctx.shadowColor = COLORS.red;
+      ctx.shadowBlur = 20;
+    } else {
+      ctx.shadowColor = player.isJumping ? COLORS.purple : COLORS.green;
+      ctx.shadowBlur = 12;
+    }
+    
+    const spriteSize = w * 1.15;
+    const offX = (w - spriteSize) / 2;
+    const offY = (h - spriteSize * stretch) / 2;
+    
+    ctx.drawImage(activeSprite, offX, offY, spriteSize * squish, spriteSize * stretch);
+    ctx.restore();
+  } else {
+    // Procedural Fallback if sprite is still fetching
+    ctx.fillStyle = '#f5f5f5'; // Ben Cat white fur
     ctx.beginPath();
-    ctx.ellipse(w * 0.3, h * 0.92 + walkCycle, 6, 4, 0, 0, Math.PI * 2);
+    ctx.ellipse(w / 2, h * 0.55, w * 0.4 * squish, h * 0.38 * stretch, 0, 0, Math.PI * 2);
     ctx.fill();
+    
+    // Black bangs
+    ctx.fillStyle = '#1e1e1e';
     ctx.beginPath();
-    ctx.ellipse(w * 0.7, h * 0.92 - walkCycle, 6, 4, 0, 0, Math.PI * 2);
+    ctx.ellipse(w / 2, h * 0.25, w * 0.25, h * 0.12, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Confused Eyes
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    ctx.arc(w * 0.38, h * 0.35, 3, 0, Math.PI * 2);
+    ctx.arc(w * 0.62, h * 0.35, 3, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // HUH mouth
+    ctx.fillStyle = '#333';
+    ctx.beginPath();
+    ctx.ellipse(w / 2, h * 0.48, 4, player.isJumping ? 6 : 4, 0, 0, Math.PI * 2);
     ctx.fill();
   }
   
@@ -546,123 +500,101 @@ function drawParticle(ctx: CanvasRenderingContext2D, p: Particle, camera: { x: n
   const y = p.y - camera.y;
   const alpha = p.life / p.maxLife;
   
+  ctx.save();
   ctx.globalAlpha = alpha;
-  
-  switch (p.type) {
-    case 'star':
-      ctx.fillStyle = p.color;
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(p.rotation || 0);
-      drawStar(ctx, 0, 0, p.size);
-      ctx.restore();
-      break;
-    case 'coin':
-      ctx.fillStyle = p.color;
-      ctx.font = `${p.size}px Arial`;
-      ctx.fillText('✦', x, y);
-      break;
-    case 'dust':
-      ctx.fillStyle = p.color;
-      ctx.beginPath();
-      ctx.arc(x, y, p.size * alpha, 0, Math.PI * 2);
-      ctx.fill();
-      break;
-    case 'stomp':
-      ctx.fillStyle = p.color;
-      ctx.font = `bold ${p.size}px Arial`;
-      ctx.textAlign = 'center';
-      ctx.fillText('💥', x, y);
-      break;
-    default:
-      ctx.fillStyle = p.color;
-      ctx.beginPath();
-      ctx.arc(x, y, p.size, 0, Math.PI * 2);
-      ctx.fill();
-  }
-  
-  ctx.globalAlpha = 1;
+  ctx.fillStyle = p.color;
+  ctx.shadowColor = p.color;
+  ctx.shadowBlur = 6;
+  ctx.beginPath();
+  ctx.arc(x, y, p.size, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
 }
 
 function drawHuhText(ctx: CanvasRenderingContext2D, h: HuhText, camera: { x: number; y: number }) {
   const x = h.x - camera.x;
   const y = h.y - camera.y;
   const alpha = h.life / h.maxLife;
-  const scale = h.scale * (1 + (1 - alpha) * 0.5);
+  const scale = h.scale * (1 + (1 - alpha) * 0.4);
   
   ctx.save();
   ctx.globalAlpha = alpha;
   ctx.translate(x, y);
   ctx.scale(scale, scale);
-  ctx.rotate(Math.sin(Date.now() * 0.01) * 0.1);
   
-  // Text shadow
-  ctx.fillStyle = 'rgba(0,0,0,0.5)';
-  ctx.font = 'bold 28px "Comic Sans MS", cursive';
+  // Iconic Viral Subtitle Red Badge
+  const text = 'Huh?';
+  ctx.font = 'bold 18px "Space Grotesk", sans-serif';
+  const textWidth = ctx.measureText(text).width;
+  
+  ctx.fillStyle = '#e50914'; // Iconic TikTok subtitle red
+  ctx.fillRect(-textWidth / 2 - 8, -14, textWidth + 16, 26);
+  
+  ctx.fillStyle = '#ffffff';
   ctx.textAlign = 'center';
-  ctx.fillText(h.text, 2, 2);
-  
-  // Main text
-  ctx.fillStyle = h.color;
-  ctx.fillText(h.text, 0, 0);
-  
-  // Outline
-  ctx.strokeStyle = '#fff';
-  ctx.lineWidth = 1;
-  ctx.strokeText(h.text, 0, 0);
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, 0, 0);
   
   ctx.restore();
 }
 
 function drawHUD(ctx: CanvasRenderingContext2D, state: GameState, canvasWidth: number) {
-  // Score
-  ctx.fillStyle = 'rgba(0,0,0,0.5)';
-  ctx.fillRect(10, 10, 200, 70);
-  ctx.strokeStyle = '#ffd700';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(10, 10, 200, 70);
+  // Left: Glassmorphic Metrics Card
+  ctx.save();
+  ctx.fillStyle = 'rgba(13, 17, 28, 0.85)';
+  ctx.fillRect(16, 16, 210, 78);
+  ctx.strokeStyle = 'rgba(57, 255, 136, 0.35)';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(16, 16, 210, 78);
   
-  ctx.fillStyle = '#fff';
-  ctx.font = 'bold 16px "Comic Sans MS", cursive';
+  // Pulsing Live Indicator Dot
+  ctx.fillStyle = COLORS.green;
+  ctx.shadowColor = COLORS.green;
+  ctx.shadowBlur = 8;
+  ctx.beginPath();
+  ctx.arc(28, 30, 4, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  
+  ctx.font = 'bold 13px "Space Mono", monospace';
   ctx.textAlign = 'left';
-  ctx.fillText(`🐱 SCORE: ${state.player.score}`, 20, 32);
-  ctx.fillText(`🐭 MICE: ${state.mice.filter(m => !m.isAlive).length}`, 20, 52);
-  ctx.fillText(`📏 DIST: ${Math.floor(state.distance)}m`, 20, 72);
   
-  // Lives
-  ctx.fillStyle = '#ff4444';
-  ctx.font = '20px Arial';
+  // Score
+  ctx.fillStyle = COLORS.green;
+  ctx.fillText(`$HUHCAT : ${state.player.score}`, 40, 34);
+  
+  // Mice deleted
+  ctx.fillStyle = COLORS.cyan;
+  const stomped = state.mice.filter(m => !m.isAlive).length;
+  ctx.fillText(`MICE    : ${stomped}`, 40, 56);
+  
+  // On-chain distance
+  ctx.fillStyle = '#a78bfa';
+  ctx.fillText(`DIST    : ${Math.floor(state.distance)}m`, 40, 78);
+  
+  // Right: Lives & High Score
+  ctx.font = '18px sans-serif';
   ctx.textAlign = 'right';
   for (let i = 0; i < state.player.lives; i++) {
-    ctx.fillText('❤️', canvasWidth - 20 - i * 30, 30);
+    ctx.fillText('❤️', canvasWidth - 16 - i * 28, 36);
   }
   
-  // Combo
-  if (state.player.combo > 1) {
-    ctx.fillStyle = '#ffd700';
-    ctx.font = 'bold 24px "Comic Sans MS", cursive';
-    ctx.textAlign = 'center';
-    ctx.fillText(`COMBO x${state.player.combo}! 🔥`, canvasWidth / 2, 35);
-  }
-  
-  // High score
   if (state.highScore > 0) {
-    ctx.fillStyle = 'rgba(255,215,0,0.7)';
-    ctx.font = '12px Arial';
+    ctx.fillStyle = COLORS.gold;
+    ctx.font = 'bold 12px "Space Mono", monospace';
     ctx.textAlign = 'right';
-    ctx.fillText(`BEST: ${state.highScore}`, canvasWidth - 20, 55);
+    ctx.fillText(`HIGH SCORE: ${state.highScore}`, canvasWidth - 16, 62);
   }
-}
-
-function drawStar(ctx: CanvasRenderingContext2D, x: number, y: number, size: number) {
-  ctx.beginPath();
-  for (let i = 0; i < 5; i++) {
-    const angle = (i * 4 * Math.PI) / 5 - Math.PI / 2;
-    const px = x + Math.cos(angle) * size;
-    const py = y + Math.sin(angle) * size;
-    if (i === 0) ctx.moveTo(px, py);
-    else ctx.lineTo(px, py);
+  
+  // Center: Active Combo Banner
+  if (state.player.combo > 1) {
+    ctx.shadowColor = COLORS.gold;
+    ctx.shadowBlur = 15;
+    ctx.fillStyle = COLORS.gold;
+    ctx.font = 'bold 22px "Syne", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`🔥 HUH COMBO x${state.player.combo}! 🔥`, canvasWidth / 2, 42);
+    ctx.shadowBlur = 0;
   }
-  ctx.closePath();
-  ctx.fill();
+  ctx.restore();
 }

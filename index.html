@@ -1,31 +1,38 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HUHCAT - The Game 🐱</title>
+    <title>$HUHCAT — The Official Game | First Inscribed Image on Solana V1</title>
+    <meta name="description" content="Play the official $HUHCAT platformer game. Jump on robo-mice, say HUH, collect Solana fish coins, and set the high score on-chain." />
+    <link rel="icon" type="image/png" href="/huhcat.png" />
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <style>
-      /* 内联样式确保主题色立即生效，避免闪烁 */
+      :root {
+        --bg: #04050a;
+        --green: #39ff88;
+        --purple: #9945ff;
+        --panel: #0d111c;
+      }
       html,
       body {
         margin: 0;
         padding: 0;
         width: 100%;
         height: 100%;
-      }
-      html.light,
-      html.light body {
-        background-color: #ffffff !important;
-        color: #000000;
-      }
-      html.dark,
-      html.dark body {
-        background-color: #1a1a1a !important;
-        color: #ffffff;
+        background-color: #04050a !important;
+        color: #eef2f6;
+        font-family: 'Space Grotesk', sans-serif;
+        overflow: hidden;
       }
     </style>
     <script>
