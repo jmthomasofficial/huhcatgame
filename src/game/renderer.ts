@@ -1,6 +1,7 @@
 import { GameState, Player, Mouse, Platform, Coin, Particle, HuhText } from './types';
 
-// Pre-load authentic Ben Cat sprites
+// Local PNGs are fallback. bindInscribedSprite() swaps these to the
+// Token-2022 data URI on companion mint DVD4q… once RPC returns.
 const baseUrl = import.meta.env.BASE_URL || '/';
 const cleanBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
 
@@ -12,6 +13,33 @@ spriteHuh.src = `${cleanBase}cat_huh.png`;
 
 const spriteDead = new Image();
 spriteDead.src = `${cleanBase}cat_dead.png`;
+
+const inscribedSprite = new Image();
+let inscribedReady = false;
+
+export function isInscribedReady(): boolean {
+  return inscribedReady && inscribedSprite.complete && inscribedSprite.naturalWidth > 0;
+}
+
+export function bindInscribedSprite(uri: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    inscribedReady = false;
+    const settle = () => {
+      inscribedReady = inscribedSprite.complete && inscribedSprite.naturalWidth > 0;
+      resolve(inscribedReady);
+    };
+    inscribedSprite.onload = settle;
+    inscribedSprite.onerror = () => {
+      inscribedReady = false;
+      resolve(false);
+    };
+    inscribedSprite.src = uri;
+    spriteIdle.src = uri;
+    spriteHuh.src = uri;
+    spriteDead.src = uri;
+    if (inscribedSprite.complete && inscribedSprite.naturalWidth > 0) settle();
+  });
+}
 
 const COLORS = {
   bgVoid: '#04050a',
@@ -491,6 +519,50 @@ function drawPlayer(ctx: CanvasRenderingContext2D, player: Player, camera: { x: 
     ctx.lineTo(-4, h);
     ctx.stroke();
     ctx.restore();
+  }
+
+  // On-chain JPEG from Token-2022 mint DVD4q — the actual inscribed face.
+  if (isInscribedReady()) {
+    const iw = w * 1.08 * squish;
+    const ih = h * 1.08 * stretch;
+    const ix = (w - iw) / 2;
+    const iy = bobY - (isAirborne ? 4 : 0);
+    ctx.save();
+    ctx.beginPath();
+    const rr = Math.min(14, iw * 0.22);
+    if (typeof ctx.roundRect === 'function') {
+      ctx.roundRect(ix, iy, iw, ih, rr);
+    } else {
+      ctx.rect(ix, iy, iw, ih);
+    }
+    ctx.clip();
+    if (isDead) ctx.filter = 'grayscale(1) brightness(0.7)';
+    ctx.drawImage(inscribedSprite, ix, iy, iw, ih);
+    ctx.filter = 'none';
+    ctx.restore();
+
+    ctx.save();
+    ctx.strokeStyle = isDead ? COLORS.red : COLORS.green;
+    ctx.lineWidth = 2;
+    ctx.shadowColor = isDead ? COLORS.red : COLORS.green;
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    if (typeof ctx.roundRect === 'function') {
+      ctx.roundRect(ix, iy, iw, ih, Math.min(14, iw * 0.22));
+    } else {
+      ctx.rect(ix, iy, iw, ih);
+    }
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.fillStyle = isDead ? COLORS.red : COLORS.green;
+    ctx.font = 'bold 8px "Space Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(isDead ? 'X' : 'V1', w / 2, iy - 4);
+
+    ctx.restore();
+    ctx.globalAlpha = 1;
+    return;
   }
 
   // Base coordinates for body parts
@@ -974,6 +1046,13 @@ function drawHUD(ctx: CanvasRenderingContext2D, state: GameState, canvasWidth: n
   ctx.fillStyle = '#ff3b5c';
   ctx.fillText(`❤️ x${state.player.lives}`, pillX + pillW / 2, pillY + (isMobile ? 19 : 21));
   
+  if (isInscribedReady()) {
+    ctx.fillStyle = COLORS.green;
+    ctx.font = 'bold 9px "Space Mono", monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('ON-CHAIN SPRITE', cardX, cardY + cardH + 14);
+  }
+
   // High Score badge on desktop or wide mobile
   if (state.highScore > 0 && canvasWidth >= 420) {
     ctx.fillStyle = COLORS.gold;

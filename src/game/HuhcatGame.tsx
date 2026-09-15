@@ -1,10 +1,19 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { GameState, Keys } from './types';
 import { createInitialState, update } from './engine';
-import { render } from './renderer';
+import { render, bindInscribedSprite } from './renderer';
 import { initAudio, playHuhSound, startBgm, setBgmVolume, getBgmVolume, isBgmMuted, toggleBgmMute } from './audio';
+import {
+  fetchHuhcatProof,
+  COIN_MINT,
+  IMAGE_MINT,
+  IMAGE_TX,
+  EXPLORER_IMAGE_MINT,
+  EXPLORER_IMAGE_TX,
+  type HuhcatProof,
+} from './chain';
 
-const OFFICIAL_CA = 'A9AHYeqb7nQk7LZUraw7rBCzYRjy2DRvE6NqWfFHKRdH';
+const OFFICIAL_CA = COIN_MINT;
 const TELEGRAM_URL = 'https://t.me/+Bzr4QWDYuMo3ZmVh';
 const WEBSITE_URL = 'https://jmthomasofficial.github.io/huhcat/';
 const DEXSCREENER_URL = 'https://dexscreener.com/solana/3wx6X4WVbyo59hCBuYozaWscdDkbbJo6cX28FKWFMxbS';
@@ -26,6 +35,8 @@ export default function HuhcatGame() {
   const [copiedCA, setCopiedCA] = useState(false);
   const [bgmVol, setBgmVol] = useState<number>(() => Math.round(getBgmVolume() * 100));
   const [isMuted, setIsMuted] = useState<boolean>(() => isBgmMuted());
+  const [proof, setProof] = useState<HuhcatProof | null>(null);
+  const [onChainImg, setOnChainImg] = useState<string | null>(null);
 
   const copyCA = () => {
     navigator.clipboard.writeText(OFFICIAL_CA);
@@ -36,6 +47,22 @@ export default function HuhcatGame() {
   // Preload authentic Ben Cat audio buffers on mount
   useEffect(() => {
     initAudio();
+  }, []);
+
+  // Pull the inscribed JPEG from companion mint DVD4q (Token-2022 uri).
+  useEffect(() => {
+    let cancelled = false;
+    fetchHuhcatProof().then(async (next) => {
+      if (cancelled) return;
+      setProof(next);
+      if (next.uri) {
+        const ok = await bindInscribedSprite(next.uri);
+        if (!cancelled && ok) setOnChainImg(next.uri);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleTestHuh = async (e: React.MouseEvent) => {
@@ -296,13 +323,23 @@ export default function HuhcatGame() {
       <header className="w-full z-30 px-3 sm:px-4 py-2 sm:py-2.5 bg-[#0d111c]/90 backdrop-blur-md border-b border-white/10 flex items-center justify-between gap-2 sm:gap-4">
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
           <a href={WEBSITE_URL} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 sm:gap-2 hover:opacity-80 transition-opacity">
-            <img src={`${cleanBase}cat_idle.png`} alt="HUHCAT" className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border border-[#39ff88]" />
+            <img src={onChainImg || `${cleanBase}cat_idle.png`} alt="HUHCAT" className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border border-[#39ff88] object-cover" />
             <span className="font-syne font-extrabold text-sm sm:text-base tracking-wider grad-text">$HUHCAT</span>
           </a>
-          <span className="hidden md:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-mono uppercase bg-[#39ff88]/10 text-[#39ff88] border border-[#39ff88]/30">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#39ff88] animate-ping" />
-            Solana V1 Inscription
-          </span>
+          <a
+            href={EXPLORER_IMAGE_TX}
+            target="_blank"
+            rel="noreferrer"
+            className="hidden md:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-mono uppercase bg-[#39ff88]/10 text-[#39ff88] border border-[#39ff88]/30 hover:bg-[#39ff88]/20"
+            title={proof?.uri ? `Sprite from mint ${IMAGE_MINT}` : 'Fetching companion mint DVD4q…'}
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${onChainImg ? 'bg-[#39ff88] animate-ping' : 'bg-yellow-400'}`} />
+            {onChainImg
+              ? 'On-chain V1 sprite'
+              : proof?.source === 'failed'
+                ? 'RPC blocked — local sprite'
+                : 'Reading DVD4q…'}
+          </a>
         </div>
 
         {/* Middle/Right: Audio BGM & CA Controls */}
@@ -415,16 +452,23 @@ export default function HuhcatGame() {
                       🐾 BEN CAT vs ROBO-MICE
                     </span>
                     <span className="px-2 py-0.5 rounded-full bg-[#9945ff]/85 border border-purple-400/50 text-[9px] sm:text-[10px] font-mono font-bold text-white backdrop-blur-md">
-                      SOLANA ARCADE
+                      V1 ON-CHAIN SPRITE
                     </span>
                   </div>
                 </div>
 
                 {/* Status Pill */}
-                <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-black/60 border border-[#39ff88]/50 backdrop-blur-md text-[9px] sm:text-[11px] font-mono text-[#39ff88] uppercase tracking-widest mb-1 shadow-lg">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#39ff88] animate-ping" />
-                  Official Solana V1 Arcade Experience
-                </div>
+                <a
+                  href={onChainImg ? EXPLORER_IMAGE_MINT : EXPLORER_IMAGE_TX}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-black/60 border border-[#39ff88]/50 backdrop-blur-md text-[9px] sm:text-[11px] font-mono text-[#39ff88] uppercase tracking-widest mb-1 shadow-lg"
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${onChainImg ? 'bg-[#39ff88] animate-ping' : 'bg-yellow-400'}`} />
+                  {onChainImg
+                    ? `Sprite = Token-2022 mint ${IMAGE_MINT.slice(0, 4)}…${IMAGE_MINT.slice(-4)}`
+                    : 'Fetching inscribed JPEG from DVD4q…'}
+                </a>
 
                 {/* Main 3D Title */}
                 <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold font-syne tracking-tight text-white drop-shadow-[0_0_25px_rgba(57,255,136,0.8)] mb-0.5">
@@ -533,7 +577,7 @@ export default function HuhcatGame() {
               />
               <div className="relative z-10 max-w-sm w-full text-center">
                 <div className="w-20 h-20 mx-auto rounded-full p-1 bg-red-500/20 border-2 border-red-500 mb-3 flex items-center justify-center shadow-[0_0_30px_rgba(255,59,92,0.4)]">
-                  <img src={`${cleanBase}cat_dead.png`} alt="Defeated" className="w-full h-full rounded-full object-cover" />
+                  <img src={onChainImg || `${cleanBase}cat_dead.png`} alt="Defeated" className="w-full h-full rounded-full object-cover" />
                 </div>
 
                 <h2 className="text-3xl md:text-4xl font-extrabold font-syne text-red-500 mb-1 tracking-tight">
@@ -598,7 +642,7 @@ export default function HuhcatGame() {
               />
               <div className="relative z-10 max-w-sm w-full text-center">
                 <div className="w-24 h-24 mx-auto rounded-full p-1 bg-gradient-to-tr from-[#39ff88] to-yellow-400 pulse-emerald mb-3">
-                  <img src={`${cleanBase}cat_idle.png`} alt="Victory" className="w-full h-full rounded-full object-cover" />
+                  <img src={onChainImg || `${cleanBase}cat_idle.png`} alt="Victory" className="w-full h-full rounded-full object-cover" />
                 </div>
 
                 <h2 className="text-3xl md:text-4xl font-extrabold font-syne grad-text mb-1">
@@ -609,7 +653,7 @@ export default function HuhcatGame() {
                 <div className="bg-[#0d111c]/90 border border-white/10 rounded-xl p-3 mb-5 font-mono text-xs text-left space-y-1 backdrop-blur-md">
                   <div className="flex justify-between"><span className="text-zinc-400">SCORE:</span><span className="text-[#39ff88] font-bold">{score}</span></div>
                   <div className="flex justify-between"><span className="text-zinc-400">TOTAL HUHs:</span><span className="text-yellow-400 font-bold">{huhCount} 🗣️</span></div>
-                  <div className="flex justify-between"><span className="text-zinc-400">STATUS:</span><span className="text-cyan-400 font-bold">100% INSCRIBED</span></div>
+                  <div className="flex justify-between"><span className="text-zinc-400">SPRITE:</span><span className="text-cyan-400 font-bold">{onChainImg ? 'DVD4q ON-CHAIN' : 'LOCAL FALLBACK'}</span></div>
                 </div>
 
                 <div className="flex flex-col gap-2">
@@ -722,7 +766,7 @@ export default function HuhcatGame() {
                   OFFICIAL WEBSITE
                 </div>
                 <div className="text-[11px] font-mono text-zinc-400">
-                  Explore Lore, Videos &amp; Tokenomics
+                  On-chain proof, Explorer links, V1 txs
                 </div>
               </div>
             </div>
@@ -736,7 +780,7 @@ export default function HuhcatGame() {
         <div className="w-full max-w-2xl flex flex-col sm:flex-row items-center justify-between gap-2 p-2.5 rounded-xl bg-[#0d111c]/90 border border-[#39ff88]/35 backdrop-blur-md shadow-xl">
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
             <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-[#39ff88]/20 text-[#39ff88] border border-[#39ff88]/40">
-              SOLANA V1 CA
+              TRADABLE CA
             </span>
             <span className="font-mono text-xs text-zinc-200 select-all font-semibold tracking-wider">
               {OFFICIAL_CA}
@@ -751,6 +795,15 @@ export default function HuhcatGame() {
               <span>{copiedCA ? '✓' : '📋'}</span>
               <span>{copiedCA ? 'COPIED!' : 'COPY CA'}</span>
             </button>
+            <a
+              href={EXPLORER_IMAGE_MINT}
+              target="_blank"
+              rel="noreferrer"
+              className="px-2.5 py-1 rounded-lg bg-[#39ff88]/10 hover:bg-[#39ff88]/20 text-[#39ff88] border border-[#39ff88]/40 text-xs font-mono font-bold transition-all"
+              title={`Image mint ${IMAGE_MINT}`}
+            >
+              IMG MINT
+            </a>
             <a
               href={DEXSCREENER_URL}
               target="_blank"
@@ -791,7 +844,17 @@ export default function HuhcatGame() {
 
       {/* FOOTER */}
       <footer className="w-full z-20 py-2 px-4 text-center font-mono text-[11px] text-zinc-500 border-t border-white/5 bg-[#04050a]/90 flex flex-col sm:flex-row items-center justify-between gap-1">
-        <p>$HUHCAT — The First Inscribed Image on Solana Mainnet V1</p>
+        <p>
+          Sprite from mint{' '}
+          <a href={EXPLORER_IMAGE_MINT} target="_blank" rel="noreferrer" className="text-[#39ff88] hover:underline">
+            {IMAGE_MINT.slice(0, 4)}…{IMAGE_MINT.slice(-4)}
+          </a>
+          {' '}· V1 tx{' '}
+          <a href={EXPLORER_IMAGE_TX} target="_blank" rel="noreferrer" className="text-[#39ff88] hover:underline">
+            {IMAGE_TX.slice(0, 4)}…{IMAGE_TX.slice(-4)}
+          </a>
+          {proof && !proof.sealed ? ' · image mint still mutable' : ''}
+        </p>
         <div className="flex items-center gap-3">
           <a href={WEBSITE_URL} target="_blank" rel="noreferrer" className="text-[#39ff88] hover:underline">Official Site</a>
           <span>•</span>
