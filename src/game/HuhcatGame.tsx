@@ -30,9 +30,14 @@ export default function HuhcatGame() {
     setTimeout(() => setCopiedCA(false), 2000);
   };
 
-  const handleTestHuh = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  // Preload authentic Ben Cat audio buffers on mount
+  useEffect(() => {
     initAudio();
+  }, []);
+
+  const handleTestHuh = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    await initAudio();
     startBgm();
     playHuhSound(1);
     setHuhCount(c => c + 1);

@@ -8,7 +8,7 @@ function getAudioContext(): AudioContext {
     audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
   }
   if (audioCtx.state === 'suspended') {
-    audioCtx.resume();
+    audioCtx.resume().catch(() => {});
   }
   return audioCtx;
 }
@@ -30,7 +30,7 @@ export async function initAudio() {
   try {
     const ctx = getAudioContext();
     if (ctx.state === 'suspended') {
-      await ctx.resume();
+      await ctx.resume().catch(() => {});
     }
     if (!huhBuffer1 && !isAudioLoading) {
       isAudioLoading = true;
@@ -50,19 +50,33 @@ export async function initAudio() {
   }
 }
 
+// Auto-trigger audio preload immediately on module execution
+if (typeof window !== 'undefined') {
+  initAudio().catch(() => {});
+  // Pre-instantiate Audio elements to ensure browser cache readiness
+  try {
+    const baseUrl = import.meta.env.BASE_URL || '/';
+    const cleanBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+    const pre1 = new Audio(`${cleanBase}huh.mp3`);
+    const pre2 = new Audio(`${cleanBase}huh2.mp3`);
+    pre1.preload = 'auto';
+    pre2.preload = 'auto';
+  } catch (e) {}
+}
+
 export function playHuhSound(pitch: number = 1) {
   try {
     const ctx = getAudioContext();
     const buffer = Math.random() > 0.4 ? huhBuffer1 : (huhBuffer2 || huhBuffer1);
 
     if (buffer) {
-      // Play real Ben Cat vocal sample
+      // Play real Ben Cat vocal sample via Web Audio API
       const source = ctx.createBufferSource();
       const gainNode = ctx.createGain();
       source.buffer = buffer;
       source.playbackRate.value = pitch;
       
-      gainNode.gain.setValueAtTime(0.85, ctx.currentTime);
+      gainNode.gain.setValueAtTime(0.95, ctx.currentTime);
       source.connect(gainNode);
       gainNode.connect(ctx.destination);
       
@@ -70,24 +84,18 @@ export function playHuhSound(pitch: number = 1) {
       return;
     }
 
-    // Fallback synth sound if sample not yet loaded
-    const oscillator = ctx.createOscillator();
-    const gainNode = ctx.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(ctx.destination);
-    
-    oscillator.type = 'sawtooth';
-    oscillator.frequency.setValueAtTime(300 * pitch, ctx.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(150 * pitch, ctx.currentTime + 0.15);
-    
-    gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
-    
-    oscillator.start(ctx.currentTime);
-    oscillator.stop(ctx.currentTime + 0.2);
+    // Direct fallback: ALWAYS play real Ben Cat "HUH?!" MP3, never a synth beep!
+    const baseUrl = import.meta.env.BASE_URL || '/';
+    const cleanBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+    const sampleUrl = Math.random() > 0.4 ? `${cleanBase}huh.mp3` : `${cleanBase}huh2.mp3`;
+    const directAudio = new Audio(sampleUrl);
+    directAudio.playbackRate = Math.max(0.6, Math.min(1.6, pitch));
+    directAudio.volume = 0.95;
+    directAudio.play().catch(e => {
+      console.warn("Direct HUH audio play error:", e);
+    });
   } catch (e) {
-    // Audio context not ready
+    console.warn("playHuhSound error:", e);
   }
 }
 
