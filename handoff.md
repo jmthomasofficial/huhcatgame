@@ -26,6 +26,7 @@
 13. **Seeded level generation** — Reproducible levels, seed displayed on game over with copy button
 14. **Powerup HUD** — Active powerup badge with countdown timer
 15. **Refined Orangie Sprite Alignment** — Authentic 3/4 perspective with big chubby white face in the front (85% of head silhouette), soft peach cheek blush, sky blue rear skull plumage, wide knit orange ribbed beanie with green pom-pom, black hoodie with green & white drawstring aglets, and dynamic facing towards oncoming Ben Cat.
+16. **One-Way Semi-Solid Cloud Platforms & Clearance Fix** — Cloud platforms are now one-way: player can jump straight UP through them from below without hitting head, and walk through sides without getting blocked. Stepped Hill (Segment B) redesigned into a clean 5-platform arch with 110px spacing and elevated heights (groundY - 75 to -155), guaranteeing 75px+ ground clearance. Post-gen validator raises any floating platform closer than 70px to the ground.
 
 ### Files Modified
 - `src/game/types.ts` — All new types (Orangie, PowerupType, expanded Player/GameState)

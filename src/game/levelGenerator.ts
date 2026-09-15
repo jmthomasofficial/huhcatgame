@@ -138,35 +138,42 @@ export function generateLevel(seed: number): { platforms: Platform[]; mice: Mous
       
       x += groundWidth;
 
-    } else if (segmentType === 'B') { // Stepped Hill
-      const groundWidth = 600;
+    } else if (segmentType === 'B') { // Stepped Hill (clean, open arch with generous clearance)
+      const numSteps = 2; // 2 ascending, 1 peak, 2 descending (5 platforms total)
+      const stepSpacing = 110;
+      const groundWidth = 100 + (numSteps * 2) * stepSpacing + 120; // 660px
       platforms.push({ x, y: groundY, width: groundWidth, height: 100, type: 'ground', zone });
       
-      const numSteps = 3 + Math.floor(rng() * 2);
-      let stepX = x + 100;
+      let stepX = x + 80;
+      // Ascending steps (elevated: groundY - 75, groundY - 115)
       for (let i = 0; i < numSteps; i++) {
-        platforms.push({ x: stepX, y: groundY - 35 * (i + 1), width: 65, height: 22, type: 'cloud', zone });
+        const stepY = groundY - 75 - i * 40;
+        platforms.push({ x: stepX, y: stepY, width: 60, height: 18, type: 'cloud', zone });
         if (rng() < 0.5) {
-          coins.push({ x: stepX + 20, y: groundY - 35 * (i + 1) - 40, width: 24, height: 24, collected: false, frame: 0, frameTimer: 0, type: 'fish' });
+          coins.push({ x: stepX + 18, y: stepY - 35, width: 24, height: 24, collected: false, frame: 0, frameTimer: 0, type: 'fish' });
         }
-        stepX += 80;
+        stepX += stepSpacing;
       }
       
+      // Peak platform (groundY - 155) with question block above
       const peakX = stepX;
-      platforms.push({ x: peakX, y: groundY - 35 * numSteps, width: 65, height: 22, type: 'cloud', zone });
-      platforms.push({ x: peakX + 12, y: groundY - 35 * numSteps - 120, width: 40, height: 40, type: 'question', zone });
+      const peakY = groundY - 75 - numSteps * 40;
+      platforms.push({ x: peakX, y: peakY, width: 65, height: 18, type: 'cloud', zone });
+      platforms.push({ x: peakX + 12, y: peakY - 60, width: 40, height: 35, type: 'question', zone });
       
-      stepX += 80;
+      stepX += stepSpacing;
+      // Descending steps
       for (let i = numSteps - 1; i >= 0; i--) {
-        platforms.push({ x: stepX, y: groundY - 35 * (i + 1), width: 65, height: 22, type: 'cloud', zone });
-        stepX += 80;
+        const stepY = groundY - 75 - i * 40;
+        platforms.push({ x: stepX, y: stepY, width: 60, height: 18, type: 'cloud', zone });
+        stepX += stepSpacing;
       }
       
       const mType = zone >= 3 ? (rng() < 0.5 ? 'big' : 'fast') : 'normal';
       const mWidth = mType === 'big' ? 48 : 32;
       const mHeight = mType === 'big' ? 48 : 32;
       mice.push({
-        x: x + groundWidth - 100, y: groundY - mHeight, width: mWidth, height: mHeight,
+        x: x + groundWidth - 80, y: groundY - mHeight, width: mWidth, height: mHeight,
         vx: -2, isAlive: true, frame: 0, frameTimer: 0, type: mType, direction: -1, squishTimer: 0
       });
       
@@ -334,6 +341,7 @@ export function generateLevel(seed: number): { platforms: Platform[]; mice: Mous
            p1.y + p1.height > p2.y;
   }
 
+  // 1. Remove any overlapping non-ground platforms
   for (let i = 0; i < platforms.length; i++) {
     if (platforms[i].type === 'ground') continue;
     for (let j = i + 1; j < platforms.length; j++) {
@@ -341,6 +349,19 @@ export function generateLevel(seed: number): { platforms: Platform[]; mice: Mous
       if (aabbOverlap(platforms[i], platforms[j])) {
         platforms.splice(j, 1);
         j--;
+      }
+    }
+  }
+
+  // 2. Guarantee minimum clearance: raise any floating platform that is less than 70px above the ground
+  for (let i = 0; i < platforms.length; i++) {
+    const p = platforms[i];
+    if (p.type === 'ground') continue;
+    for (const g of platforms) {
+      if (g.type === 'ground' && p.x + p.width > g.x && p.x < g.x + g.width) {
+        if (p.y + p.height > g.y - 65) {
+          p.y = g.y - 70 - p.height;
+        }
       }
     }
   }

@@ -1305,7 +1305,7 @@
       "label": "drawOrangie()",
       "file_type": "code",
       "source_file": "src/game/orangie.ts",
-      "source_location": "L9",
+      "source_location": "L13",
       "_origin": "ast",
       "id": "src_game_orangie_draworangie",
       "community": 0,
@@ -1313,10 +1313,21 @@
       "norm_label": "draworangie()"
     },
     {
+      "label": "drawOrangieBase()",
+      "file_type": "code",
+      "source_file": "src/game/orangie.ts",
+      "source_location": "L96",
+      "_origin": "ast",
+      "id": "src_game_orangie_draworangiebase",
+      "community": 0,
+      "community_name": "renderer.ts",
+      "norm_label": "draworangiebase()"
+    },
+    {
       "label": "getPowerupIcon()",
       "file_type": "code",
       "source_file": "src/game/orangie.ts",
-      "source_location": "L288",
+      "source_location": "L347",
       "_origin": "ast",
       "id": "src_game_orangie_getpowerupicon",
       "community": 0,
@@ -1327,23 +1338,12 @@
       "label": "drawOrangieRescue()",
       "file_type": "code",
       "source_file": "src/game/orangie.ts",
-      "source_location": "L303",
+      "source_location": "L362",
       "_origin": "ast",
       "id": "src_game_orangie_draworangierescue",
       "community": 0,
       "community_name": "renderer.ts",
       "norm_label": "draworangierescue()"
-    },
-    {
-      "label": "drawOrangieCutsceneSprite()",
-      "file_type": "code",
-      "source_file": "src/game/orangie.ts",
-      "source_location": "L440",
-      "_origin": "ast",
-      "id": "src_game_orangie_draworangiecutscenesprite",
-      "community": 0,
-      "community_name": "renderer.ts",
-      "norm_label": "draworangiecutscenesprite()"
     },
     {
       "label": "renderer.ts",
@@ -4493,7 +4493,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/game/orangie.ts",
-      "source_location": "L9",
+      "source_location": "L13",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_game_orangie",
@@ -4504,18 +4504,18 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/game/orangie.ts",
-      "source_location": "L440",
+      "source_location": "L96",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_game_orangie",
-      "target": "src_game_orangie_draworangiecutscenesprite",
+      "target": "src_game_orangie_draworangiebase",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/game/orangie.ts",
-      "source_location": "L303",
+      "source_location": "L362",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_game_orangie",
@@ -4526,7 +4526,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/game/orangie.ts",
-      "source_location": "L288",
+      "source_location": "L347",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_game_orangie",
@@ -4598,7 +4598,19 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/game/orangie.ts",
-      "source_location": "L258",
+      "source_location": "L58",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_game_orangie_draworangie",
+      "target": "src_game_orangie_draworangiebase",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/game/orangie.ts",
+      "source_location": "L67",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_game_orangie_draworangie",
@@ -4634,11 +4646,11 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/game/orangie.ts",
-      "source_location": "L376",
+      "source_location": "L434",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_game_orangie_draworangierescue",
-      "target": "src_game_orangie_draworangiecutscenesprite",
+      "target": "src_game_orangie_draworangiebase",
       "confidence_score": 1.0
     },
     {
@@ -5449,5 +5461,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "4883f1fe748646d2e52a879b8418155b92087a98"
+  "built_at_commit": "d5939b5f01593fdedc52b80791565fe7cd921195"
 }

@@ -197,7 +197,19 @@ function updatePlayer(state: GameState, keys: Keys, dt: number) {
   
   for (const platform of state.platforms) {
     if (checkPlayerPlatformCollision(player, platform)) {
-      // Landing on top
+      // Cloud platforms are ONE-WAY (semi-solid): only land on top when falling downward!
+      if (platform.type === 'cloud') {
+        if (player.vy > 0 && player.y + player.height - player.vy * dt * 60 <= platform.y + 6) {
+          player.y = platform.y - player.height;
+          player.vy = 0;
+          player.isOnGround = true;
+          player.isJumping = false;
+        }
+        // Player passes freely through bottom and sides of clouds — no head bonks, no blocking!
+        continue;
+      }
+
+      // Landing on top (ground, brick, question, moving)
       if (player.vy > 0 && player.y + player.height - player.vy * dt * 60 <= platform.y + 5) {
         player.y = platform.y - player.height;
         player.vy = 0;
@@ -209,7 +221,7 @@ function updatePlayer(state: GameState, keys: Keys, dt: number) {
           player.x += (platform.moveDir || 0) * 1.5 * dt * 60;
         }
       }
-      // Hitting from below
+      // Hitting from below (solid blocks only)
       else if (player.vy < 0 && player.y - player.vy * dt * 60 >= platform.y + platform.height - 5) {
         player.y = platform.y + platform.height;
         player.vy = 1;
