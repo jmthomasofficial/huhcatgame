@@ -59,6 +59,17 @@ export default function HuhcatGame() {
     startBgm();
   };
 
+  const handleShareOnX = () => {
+    const gameUrl = 'https://jmthomasofficial.github.io/huhcatgame/';
+    const shareScore = score > 0 ? score : highScore;
+    const text = shareScore > 0 
+      ? `I just scored ${shareScore} PTS in the official $HUHCAT arcade game! 🐾🎮\n\nCan you beat my score? Jump, meow, smash bricks & stomp robo-mice with legendary Ben Cat!\n\nPlay free in your browser (mobile & desktop):\n${gameUrl}\n\nCA: ${OFFICIAL_CA}\n#HUHCAT #Solana #BenCat #Gaming`
+      : `Playing the official $HUHCAT arcade game on Solana! 🐾🎮\n\nJump, meow, smash bricks & stomp robo-mice with legendary Ben Cat!\n\nPlay free in your browser (mobile & desktop):\n${gameUrl}\n\nCA: ${OFFICIAL_CA}\n#HUHCAT #Solana #BenCat #Gaming`;
+      
+    const xUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+    window.open(xUrl, '_blank', 'noopener,noreferrer');
+  };
+
   const startGame = useCallback(() => {
     initAudio();
     startBgm();
@@ -250,7 +261,7 @@ export default function HuhcatGame() {
       const container = canvas.parentElement;
       if (!container) return;
       canvas.width = Math.min(940, container.clientWidth);
-      canvas.height = Math.min(620, Math.max(480, container.clientHeight - 80));
+      canvas.height = Math.min(540, Math.max(420, window.innerHeight - 380));
     };
     
     handleResize();
@@ -259,7 +270,7 @@ export default function HuhcatGame() {
   }, []);
 
   return (
-    <div className="w-full h-screen flex flex-col items-center justify-between bg-[#04050a] text-[#eef2f6] overflow-hidden relative select-none">
+    <div className="w-full min-h-screen flex flex-col items-center justify-between bg-[#04050a] text-[#eef2f6] overflow-x-hidden relative select-none">
       {/* Background Cyber Grid */}
       <div className="absolute inset-0 cyber-grid opacity-30 pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(57,255,136,0.08)_0%,_transparent_60%)] pointer-events-none" />
@@ -346,13 +357,13 @@ export default function HuhcatGame() {
         <div className="relative w-full h-full flex items-center justify-center">
           <canvas
             ref={canvasRef}
-            className="w-full h-full max-h-[600px] rounded-xl border border-white/10 shadow-[0_0_50px_rgba(57,255,136,0.15)] bg-[#04050a]"
+            className="w-full h-full max-h-[580px] rounded-xl border border-white/10 shadow-[0_0_50px_rgba(57,255,136,0.15)] bg-[#04050a]"
             style={{ imageRendering: 'auto' }}
           />
 
           {/* TITLE SCREEN / SPLASH SCREEN */}
           {gameScreen === 'title' && (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-end md:justify-center p-4 md:p-8 rounded-xl overflow-hidden border border-[#39ff88]/30 shadow-[0_0_60px_rgba(57,255,136,0.2)]">
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-end md:justify-center p-3 md:p-6 rounded-xl overflow-hidden border border-[#39ff88]/30 shadow-[0_0_60px_rgba(57,255,136,0.2)]">
               {/* Background Splash Image with Cinematic Ambient Zoom */}
               <img
                 src="/splash.jpg"
@@ -361,29 +372,48 @@ export default function HuhcatGame() {
               />
               
               {/* Vignette & Scanline Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#04050a] via-[#04050a]/60 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#04050a] via-[#04050a]/65 to-transparent" />
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_40%,_#04050a_95%)] pointer-events-none" />
               <div className="absolute inset-0 scanline opacity-25 pointer-events-none" />
 
               {/* Title Screen Foreground Content */}
-              <div className="relative z-10 max-w-lg w-full text-center flex flex-col items-center mb-2 md:mb-0">
+              <div className="relative z-10 max-w-lg w-full text-center flex flex-col items-center mb-1 md:mb-0">
+                
+                {/* TOP CENTER STEAM-QUALITY HERO ACTION ARTWORK */}
+                <div className="relative w-full max-w-xs sm:max-w-md mb-2 rounded-xl overflow-hidden border-2 border-[#39ff88]/50 shadow-[0_0_35px_rgba(57,255,136,0.35)] group bg-black/80">
+                  <img
+                    src="/hero-pounce.jpg"
+                    alt="HUHCAT Pouncing on Robo-Mouse"
+                    className="w-full h-28 sm:h-36 object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#04050a] via-transparent to-black/20" />
+                  <div className="absolute bottom-1.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none">
+                    <span className="px-2 py-0.5 rounded-full bg-black/85 border border-[#39ff88]/60 text-[9px] sm:text-[10px] font-mono font-bold text-[#39ff88] backdrop-blur-md">
+                      🐾 BEN CAT vs ROBO-MICE
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-[#9945ff]/85 border border-purple-400/50 text-[9px] sm:text-[10px] font-mono font-bold text-white backdrop-blur-md">
+                      SOLANA ARCADE
+                    </span>
+                  </div>
+                </div>
+
                 {/* Status Pill */}
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/60 border border-[#39ff88]/50 backdrop-blur-md text-[11px] font-mono text-[#39ff88] uppercase tracking-widest mb-3 shadow-lg">
-                  <span className="w-2 h-2 rounded-full bg-[#39ff88] animate-ping" />
+                <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-black/60 border border-[#39ff88]/50 backdrop-blur-md text-[10px] sm:text-[11px] font-mono text-[#39ff88] uppercase tracking-widest mb-1.5 shadow-lg">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#39ff88] animate-ping" />
                   Official Solana V1 Arcade Experience
                 </div>
 
                 {/* Main 3D Title */}
-                <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold font-syne tracking-tight text-white drop-shadow-[0_0_25px_rgba(57,255,136,0.8)] mb-1">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold font-syne tracking-tight text-white drop-shadow-[0_0_25px_rgba(57,255,136,0.8)] mb-0.5">
                   HUHCAT
                 </h1>
-                <p className="text-sm sm:text-base md:text-lg font-mono font-bold tracking-wider grad-text uppercase mb-4 drop-shadow-md">
+                <p className="text-xs sm:text-sm font-mono font-bold tracking-wider grad-text uppercase mb-2 drop-shadow-md">
                   ⚔️ MICE &amp; MAYHEM ⚔️
                 </p>
 
                 {/* Briefing Mini-Card */}
-                <div className="w-full bg-[#0d111c]/85 border border-white/15 backdrop-blur-md rounded-xl p-3 mb-5 font-mono text-xs text-zinc-300 shadow-2xl">
-                  <div className="grid grid-cols-2 gap-2 text-left">
+                <div className="w-full bg-[#0d111c]/85 border border-white/15 backdrop-blur-md rounded-xl p-2 sm:p-2.5 mb-3 font-mono text-[11px] sm:text-xs text-zinc-300 shadow-2xl">
+                  <div className="grid grid-cols-2 gap-1.5 text-left">
                     <div className="flex items-center gap-1.5">
                       <span className="text-zinc-500">MOVE:</span>
                       <span className="text-white font-bold">A / D or ⬅️ ➡️</span>
@@ -404,10 +434,10 @@ export default function HuhcatGame() {
                 </div>
 
                 {/* Action CTA Buttons */}
-                <div className="flex flex-col sm:flex-row gap-3 w-full justify-center">
+                <div className="flex flex-col sm:flex-row gap-2.5 w-full justify-center">
                   <button
                     onClick={startGame}
-                    className="flex-1 py-3.5 px-6 rounded-xl bg-gradient-to-r from-[#39ff88] via-[#00ff87] to-[#00d15c] text-[#001a0a] font-black font-syne text-base tracking-widest hover:shadow-[0_0_35px_rgba(57,255,136,0.8)] hover:scale-105 active:scale-95 transition-all cursor-pointer shadow-xl flex items-center justify-center gap-2"
+                    className="flex-1 py-3 px-6 rounded-xl bg-gradient-to-r from-[#39ff88] via-[#00ff87] to-[#00d15c] text-[#001a0a] font-black font-syne text-sm sm:text-base tracking-widest hover:shadow-[0_0_35px_rgba(57,255,136,0.8)] hover:scale-105 active:scale-95 transition-all cursor-pointer shadow-xl flex items-center justify-center gap-2"
                   >
                     <span>▶</span>
                     <span>START GAME</span>
@@ -415,7 +445,7 @@ export default function HuhcatGame() {
 
                   <button
                     onClick={handleTestHuh}
-                    className="py-3.5 px-5 rounded-xl bg-black/60 hover:bg-black/80 border border-[#39ff88]/40 hover:border-[#39ff88] text-[#39ff88] font-mono text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer backdrop-blur-md shadow-lg"
+                    className="py-3 px-4 rounded-xl bg-black/60 hover:bg-black/80 border border-[#39ff88]/40 hover:border-[#39ff88] text-[#39ff88] font-mono text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer backdrop-blur-md shadow-lg"
                     title="Trigger the iconic Ben Cat vocalization"
                   >
                     <span>🔊</span> TEST REAL "HUH"
@@ -423,9 +453,47 @@ export default function HuhcatGame() {
                 </div>
 
                 {/* Score & Start Notice */}
-                <div className="flex items-center justify-between w-full px-2 mt-3 text-[11px] font-mono text-zinc-400">
+                <div className="flex items-center justify-between w-full px-2 mt-2 text-[10px] sm:text-[11px] font-mono text-zinc-400">
                   <span>{highScore > 0 ? `🏆 RECORD: ${highScore} PTS` : 'READY PLAYER ONE'}</span>
                   <span className="text-[#39ff88] animate-pulse">PRESS SPACE TO PLAY</span>
+                </div>
+
+                {/* Bottom Center Title Screen Quick Links */}
+                <div className="w-full mt-2.5 pt-2 border-t border-white/10 flex flex-wrap items-center justify-center gap-1.5 text-[10px] sm:text-[11px] font-mono">
+                  <a
+                    href={PUMPFUN_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-2.5 py-1 rounded-lg bg-[#14F195]/20 hover:bg-[#14F195]/30 text-[#14F195] border border-[#14F195]/40 font-bold transition-all flex items-center gap-1"
+                  >
+                    <span>🚀</span>
+                    <span>BUY ON PUMPFUN (+FREE SOL)</span>
+                  </a>
+                  <a
+                    href={WEBSITE_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold transition-all flex items-center gap-1"
+                  >
+                    <span>🌐</span>
+                    <span>WEBSITE</span>
+                  </a>
+                  <button
+                    onClick={copyCA}
+                    className="px-2.5 py-1 rounded-lg bg-black/60 hover:bg-black/80 text-[#39ff88] border border-[#39ff88]/40 font-bold transition-all cursor-pointer flex items-center gap-1"
+                  >
+                    <span>{copiedCA ? '✓' : '📋'}</span>
+                    <span>{copiedCA ? 'COPIED!' : 'COPY CA'}</span>
+                  </button>
+                  <a
+                    href={TELEGRAM_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-2.5 py-1 rounded-lg bg-[#229ed9]/20 hover:bg-[#229ed9]/30 text-[#229ed9] border border-[#229ed9]/40 font-bold transition-all flex items-center gap-1"
+                  >
+                    <span>✈️</span>
+                    <span>TG CHAT</span>
+                  </a>
                 </div>
               </div>
             </div>
@@ -579,6 +647,122 @@ export default function HuhcatGame() {
           )}
         </div>
       </main>
+
+      {/* VIRAL TOKEN & COMMUNITY CONVERSION HUB (BELOW IN-GAME SCREEN) */}
+      <section className="w-full max-w-[940px] px-3 py-3 flex flex-col items-center gap-3 z-20">
+        
+        {/* ROW 1: DUAL HIGH-CONVERSION ACTION BUTTONS */}
+        <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Button 1: Buy $HUHCAT on Pumpfun */}
+          <a
+            href={PUMPFUN_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="group relative flex items-center justify-between p-3.5 rounded-xl bg-gradient-to-r from-[#14F195]/20 via-[#9945ff]/20 to-[#14F195]/20 hover:from-[#14F195]/30 hover:to-[#9945ff]/30 border border-[#14F195]/50 hover:border-[#14F195] transition-all hover:scale-[1.02] active:scale-[0.99] shadow-[0_0_25px_rgba(20,241,149,0.15)] overflow-hidden cursor-pointer"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#14F195]/20 border border-[#14F195]/40 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
+                🚀
+              </div>
+              <div className="text-left">
+                <div className="font-syne font-extrabold text-sm sm:text-base text-white tracking-wide flex items-center gap-1.5">
+                  <span>BUY $HUHCAT ON PUMPFUN</span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#14F195] text-black font-bold font-mono uppercase animate-pulse">
+                    HOT
+                  </span>
+                </div>
+                <div className="text-[11px] font-mono font-bold text-[#14F195] tracking-tight">
+                  🎁 Get FREE Solana Just for Holding!
+                </div>
+              </div>
+            </div>
+            <span className="text-zinc-400 group-hover:text-white group-hover:translate-x-1 transition-all text-base font-bold">
+              ➔
+            </span>
+          </a>
+
+          {/* Button 2: Official Website */}
+          <a
+            href={WEBSITE_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="group relative flex items-center justify-between p-3.5 rounded-xl bg-[#0d111c]/90 hover:bg-[#111728] border border-white/15 hover:border-[#39ff88]/60 transition-all hover:scale-[1.02] active:scale-[0.99] shadow-lg overflow-hidden backdrop-blur-md cursor-pointer"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#39ff88]/15 border border-[#39ff88]/30 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
+                🌐
+              </div>
+              <div className="text-left">
+                <div className="font-syne font-extrabold text-sm sm:text-base text-white tracking-wide">
+                  OFFICIAL WEBSITE
+                </div>
+                <div className="text-[11px] font-mono text-zinc-400">
+                  Explore Lore, Videos &amp; Tokenomics
+                </div>
+              </div>
+            </div>
+            <span className="text-zinc-400 group-hover:text-[#39ff88] group-hover:translate-x-1 transition-all text-base font-bold">
+              ➔
+            </span>
+          </a>
+        </div>
+
+        {/* ROW 2: CENTERED CONTRACT ADDRESS (CA) CARD */}
+        <div className="w-full max-w-2xl flex flex-col sm:flex-row items-center justify-between gap-2 p-2.5 rounded-xl bg-[#0d111c]/90 border border-[#39ff88]/35 backdrop-blur-md shadow-xl">
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-[#39ff88]/20 text-[#39ff88] border border-[#39ff88]/40">
+              SOLANA V1 CA
+            </span>
+            <span className="font-mono text-xs text-zinc-200 select-all font-semibold tracking-wider">
+              {OFFICIAL_CA}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={copyCA}
+              className="px-3 py-1 rounded-lg bg-[#39ff88] hover:bg-[#00ff87] text-[#001a0a] font-mono text-xs font-black tracking-wider transition-all cursor-pointer shadow-[0_0_15px_rgba(57,255,136,0.4)] hover:scale-105 active:scale-95 flex items-center gap-1"
+            >
+              <span>{copiedCA ? '✓' : '📋'}</span>
+              <span>{copiedCA ? 'COPIED!' : 'COPY CA'}</span>
+            </button>
+            <a
+              href={DEXSCREENER_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="px-2.5 py-1 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 text-xs font-mono font-bold transition-all"
+              title="View on DexScreener"
+            >
+              CHART
+            </a>
+          </div>
+        </div>
+
+        {/* ROW 3: TELEGRAM GROUP & VIRAL SHARE ON X BUTTONS */}
+        <div className="w-full max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          {/* Telegram Chat Group */}
+          <a
+            href={TELEGRAM_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-[#229ed9]/20 hover:bg-[#229ed9]/30 text-[#229ed9] border border-[#229ed9]/50 font-mono text-xs font-extrabold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-md text-center"
+          >
+            <span className="text-base">✈️</span>
+            <span>JOIN OFFICIAL TG CHAT</span>
+          </a>
+
+          {/* Viral 1-Click Share on X (Twitter) */}
+          <button
+            onClick={handleShareOnX}
+            className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-zinc-800 to-black hover:from-black hover:to-zinc-900 text-white border border-white/25 hover:border-white font-mono text-xs font-extrabold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-md cursor-pointer"
+            title="Share your score and game on X (Twitter)"
+          >
+            <span className="font-sans text-sm font-bold">𝕏</span>
+            <span>SHARE ON X (TWITTER)</span>
+          </button>
+        </div>
+
+      </section>
 
       {/* FOOTER */}
       <footer className="w-full z-20 py-2 px-4 text-center font-mono text-[11px] text-zinc-500 border-t border-white/5 bg-[#04050a]/90 flex flex-col sm:flex-row items-center justify-between gap-1">

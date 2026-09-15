@@ -61,8 +61,8 @@ export function render(ctx: CanvasRenderingContext2D, state: GameState, canvasWi
     }
   });
   
-  // 5. Draw Player with authentic Ben Cat Sprite
-  drawPlayer(ctx, state.player, camera, state.gameOver);
+  // 5. Draw Player with authentic animated Ben Cat Sprite
+  drawPlayer(ctx, state.player, camera, state.gameOver, state.time);
   
   // 6. Draw Sparks & Particles
   state.particles.forEach(p => drawParticle(ctx, p, camera));
@@ -404,7 +404,7 @@ function drawCoin(ctx: CanvasRenderingContext2D, c: Coin, camera: { x: number; y
   }
 }
 
-function drawPlayer(ctx: CanvasRenderingContext2D, player: Player, camera: { x: number; y: number }, gameOver: boolean) {
+function drawPlayer(ctx: CanvasRenderingContext2D, player: Player, camera: { x: number; y: number }, gameOver: boolean, time: number = 0) {
   const x = player.x - camera.x;
   const y = player.y - camera.y;
   const flip = player.facing === 'left';
@@ -424,73 +424,422 @@ function drawPlayer(ctx: CanvasRenderingContext2D, player: Player, camera: { x: 
   
   const w = player.width;
   const h = player.height;
-  const squish = player.isStomping ? 0.8 : 1;
-  const stretch = player.isJumping ? 1.15 : 1;
   
-  // Ground Shadow
-  ctx.fillStyle = 'rgba(0,0,0,0.5)';
+  const isMoving = Math.abs(player.vx) > 0.25;
+  const isAirborne = !player.isOnGround || player.isJumping;
+  const isStomping = player.isStomping;
+  const isDead = gameOver;
+  
+  // Squash and stretch dynamics
+  const squish = isStomping ? 0.82 : (isAirborne ? 0.92 : 1);
+  const stretch = isStomping ? 1.22 : (isAirborne ? 1.15 : 1);
+  
+  // Kinetic run & breath cycles
+  const runPhase = isMoving && !isAirborne ? (time * 16 + player.x * 0.08) % (Math.PI * 2) : 0;
+  const bobY = isMoving && !isAirborne 
+    ? Math.abs(Math.sin(runPhase)) * 3 
+    : (!isAirborne ? Math.sin(time * 3) * 1.2 : (isStomping ? 4 : -3));
+    
+  const legSwing1 = isMoving && !isAirborne 
+    ? Math.sin(runPhase) * 11 
+    : (isAirborne ? (isStomping ? 2 : 8) : 0);
+  const legSwing2 = isMoving && !isAirborne 
+    ? Math.sin(runPhase + Math.PI) * 11 
+    : (isAirborne ? (isStomping ? 2 : -7) : 0);
+    
+  const tailWag = isMoving 
+    ? Math.sin(runPhase) * 0.4 
+    : (isAirborne ? -0.35 : Math.sin(time * 2.5) * 0.22);
+    
+  const isBlinking = !isDead && (Math.floor(time * 0.4) % 4 === 0) && ((time * 0.4) % 1 < 0.08);
+
+  // 1. Ground Shadow
+  if (!isDead) {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+    ctx.beginPath();
+    const shadowScale = 1 / (1 + (isAirborne ? 0.6 : 0));
+    ctx.ellipse(w / 2, h + 2, (w * 0.42) * shadowScale, 3.5 * shadowScale, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // 2. Action Aura & Speed Trails
+  if (isStomping) {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255, 59, 92, 0.8)';
+    ctx.lineWidth = 2.5;
+    ctx.shadowColor = COLORS.red;
+    ctx.shadowBlur = 15;
+    ctx.beginPath();
+    ctx.moveTo(w * 0.2, -8);
+    ctx.lineTo(w * 0.2, h + 6);
+    ctx.moveTo(w * 0.5, -12);
+    ctx.lineTo(w * 0.5, h + 10);
+    ctx.moveTo(w * 0.8, -8);
+    ctx.lineTo(w * 0.8, h + 6);
+    ctx.stroke();
+    ctx.restore();
+  } else if (isAirborne) {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(57, 255, 136, 0.5)';
+    ctx.lineWidth = 2;
+    ctx.shadowColor = COLORS.green;
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.moveTo(w * 0.1, h * 0.5);
+    ctx.lineTo(-6, h * 0.8);
+    ctx.moveTo(w * 0.2, h * 0.7);
+    ctx.lineTo(-4, h);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // Base coordinates for body parts
+  const bx = w * 0.48;
+  const by = h * 0.58 + bobY;
+
+  // 3. Tail (Curved organic cat tail behind body)
+  ctx.save();
+  ctx.lineCap = 'round';
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = '#ffffff';
   ctx.beginPath();
-  ctx.ellipse(w / 2, h + 2, w * 0.4, 4, 0, 0, Math.PI * 2);
+  const tailBaseX = bx - 14;
+  const tailBaseY = by + 2;
+  const tailMidX = tailBaseX - 10 + tailWag * 12;
+  const tailMidY = tailBaseY - 10;
+  const tailTipX = tailBaseX - 12 + tailWag * 16;
+  const tailTipY = tailBaseY - 22;
+  ctx.moveTo(tailBaseX, tailBaseY);
+  ctx.quadraticCurveTo(tailMidX, tailMidY, tailTipX, tailTipY);
+  ctx.stroke();
+  
+  // Black Tip of Tail
+  ctx.strokeStyle = '#18181b';
+  ctx.lineWidth = 4.5;
+  ctx.beginPath();
+  ctx.moveTo(tailMidX, tailMidY);
+  ctx.lineTo(tailTipX, tailTipY);
+  ctx.stroke();
+  ctx.restore();
+
+  // 4. Far Hind & Front Legs (Shadowed tone for 3D depth)
+  ctx.fillStyle = '#cbd5e1';
+  ctx.strokeStyle = '#0f172a';
+  ctx.lineWidth = 1.5;
+  
+  // Far Hind Paw
+  ctx.beginPath();
+  ctx.ellipse(bx - 10 + legSwing2, by + 16, 4, 5, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  
+  // Far Front Paw
+  ctx.beginPath();
+  ctx.ellipse(bx + 8 + legSwing1, by + 16, 4, 5, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  // 5. Main Feline Torso
+  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = '#0f172a';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.ellipse(bx, by + 3, 14 * squish, 12 * stretch, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  // Ben Cat's signature black fur saddle patch on back
+  ctx.fillStyle = '#18181b';
+  ctx.beginPath();
+  ctx.ellipse(bx - 7, by - 1, 7, 6, -0.3, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 6. Near Hind & Front Legs (Foreground, bright white with dark paw pads)
+  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = '#0f172a';
+  ctx.lineWidth = 1.8;
+  
+  // Near Hind Leg
+  const nhX = bx - 6 + legSwing1;
+  const nhY = by + 17;
+  ctx.beginPath();
+  ctx.ellipse(nhX, nhY, 4.5, 5.5, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  // Near Hind Paw Pad
+  ctx.fillStyle = '#334155';
+  ctx.beginPath();
+  ctx.ellipse(nhX, nhY + 3.5, 2.5, 1.5, 0, 0, Math.PI * 2);
   ctx.fill();
   
-  // Select Sprite: Dead -> Huh (Jump/Stomp) -> Idle
-  let activeSprite: HTMLImageElement | null = null;
-  if (gameOver) {
-    activeSprite = spriteDead;
-  } else if (player.isJumping || player.isStomping) {
-    activeSprite = spriteHuh;
+  // Near Front Leg
+  ctx.fillStyle = '#ffffff';
+  const nfX = bx + 12 + legSwing2;
+  const nfY = by + 17;
+  ctx.beginPath();
+  ctx.ellipse(nfX, nfY, 4.5, 5.5, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  // Near Front Paw Pad
+  ctx.fillStyle = '#334155';
+  ctx.beginPath();
+  ctx.ellipse(nfX, nfY + 3.5, 2.5, 1.5, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 7. Head & Facial Features
+  const hx = bx + 4;
+  const hy = by - 13;
+  
+  // Ears (Ears tilt back when jumping/stomping)
+  const earTilt = isAirborne ? -0.15 : (isStomping ? -0.25 : 0);
+  
+  // Left Ear
+  ctx.save();
+  ctx.translate(hx - 8, hy - 9);
+  ctx.rotate(earTilt);
+  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = '#0f172a';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(-5, 5);
+  ctx.lineTo(-2, -14);
+  ctx.lineTo(6, 2);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  // Pink Inner Ear
+  ctx.fillStyle = '#f472b6';
+  ctx.beginPath();
+  ctx.moveTo(-3, 3);
+  ctx.lineTo(-2, -10);
+  ctx.lineTo(4, 1);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+
+  // Right Ear
+  ctx.save();
+  ctx.translate(hx + 6, hy - 9);
+  ctx.rotate(earTilt);
+  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = '#0f172a';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(-4, 3);
+  ctx.lineTo(3, -14);
+  ctx.lineTo(7, 5);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  // Pink Inner Ear
+  ctx.fillStyle = '#f472b6';
+  ctx.beginPath();
+  ctx.moveTo(-2, 1);
+  ctx.lineTo(3, -10);
+  ctx.lineTo(5, 3);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+
+  // Head Base Circle
+  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = '#0f172a';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.ellipse(hx, hy, 14.5 * squish, 13 * stretch, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  // Cheek Fluff Tufts
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.moveTo(hx - 13, hy + 2);
+  ctx.lineTo(hx - 18, hy + 5);
+  ctx.lineTo(hx - 12, hy + 8);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  
+  ctx.beginPath();
+  ctx.moveTo(hx + 13, hy + 2);
+  ctx.lineTo(hx + 18, hy + 5);
+  ctx.lineTo(hx + 12, hy + 8);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // 8. THE ICONIC BEN CAT BLACK BANGS / WIG!
+  // Sits squarely on the crown and forehead between ears
+  ctx.fillStyle = '#18181b';
+  ctx.strokeStyle = '#0f172a';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(hx - 11, hy - 8);
+  ctx.quadraticCurveTo(hx, hy - 14, hx + 11, hy - 8);
+  ctx.quadraticCurveTo(hx + 10, hy - 2, hx + 7, hy - 1);
+  ctx.quadraticCurveTo(hx + 3, hy - 3, hx, hy - 1);
+  ctx.quadraticCurveTo(hx - 4, hy - 3, hx - 8, hy - 1);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  
+  // Glossy hair specular highlight arc
+  ctx.strokeStyle = 'rgba(148, 163, 184, 0.4)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(hx, hy - 7, 7, Math.PI * 1.1, Math.PI * 1.8);
+  ctx.stroke();
+
+  // 9. Eyes
+  const eyeY = hy - 1;
+  
+  if (isDead) {
+    // Comical Knockout 'X' Eyes
+    ctx.strokeStyle = '#ff3b5c';
+    ctx.lineWidth = 2.5;
+    // Left X
+    ctx.beginPath();
+    ctx.moveTo(hx - 8, eyeY - 4); ctx.lineTo(hx - 2, eyeY + 4);
+    ctx.moveTo(hx - 2, eyeY - 4); ctx.lineTo(hx - 8, eyeY + 4);
+    // Right X
+    ctx.moveTo(hx + 2, eyeY - 4); ctx.lineTo(hx + 8, eyeY + 4);
+    ctx.moveTo(hx + 8, eyeY - 4); ctx.lineTo(hx + 2, eyeY + 4);
+    ctx.stroke();
+  } else if (isBlinking) {
+    // Blink curves
+    ctx.strokeStyle = '#0f172a';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(hx - 5, eyeY, 3, 0, Math.PI);
+    ctx.arc(hx + 5, eyeY, 3, 0, Math.PI);
+    ctx.stroke();
   } else {
-    activeSprite = spriteIdle;
+    // Bewildered Amber / Gold HUHCAT Eyes
+    // Left Eye
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = '#0f172a';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.ellipse(hx - 5.5, eyeY, 4, 4.8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    // Iris
+    ctx.fillStyle = '#f59e0b'; // Amber Gold
+    ctx.beginPath();
+    ctx.ellipse(hx - 5, eyeY + 0.2, 2.8, 3.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Pupil
+    ctx.fillStyle = '#0f172a';
+    ctx.beginPath();
+    ctx.ellipse(hx - 4.5, eyeY + 0.5, 1.8, 2.4, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Specular Glint
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(hx - 6, eyeY - 1.2, 1.2, 0, Math.PI * 2);
+    ctx.arc(hx - 3.5, eyeY + 1.2, 0.6, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Right Eye
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = '#0f172a';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.ellipse(hx + 5.5, eyeY, 4, 4.8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    // Iris
+    ctx.fillStyle = '#f59e0b';
+    ctx.beginPath();
+    ctx.ellipse(hx + 5, eyeY + 0.2, 2.8, 3.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Pupil
+    ctx.fillStyle = '#0f172a';
+    ctx.beginPath();
+    ctx.ellipse(hx + 4.5, eyeY + 0.5, 1.8, 2.4, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Specular Glint
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(hx + 4, eyeY - 1.2, 1.2, 0, Math.PI * 2);
+    ctx.arc(hx + 6.5, eyeY + 1.2, 0.6, 0, Math.PI * 2);
+    ctx.fill();
   }
+
+  // 10. Cute Pink Nose & Snout
+  const noseY = hy + 5.5;
+  ctx.fillStyle = '#f472b6';
+  ctx.beginPath();
+  ctx.moveTo(hx - 2, noseY);
+  ctx.lineTo(hx + 2, noseY);
+  ctx.lineTo(hx, noseY + 2.2);
+  ctx.closePath();
+  ctx.fill();
+
+  // Whiskers
+  ctx.strokeStyle = 'rgba(15, 23, 42, 0.45)';
+  ctx.lineWidth = 1;
+  // Left whiskers
+  ctx.beginPath();
+  ctx.moveTo(hx - 4, noseY + 1); ctx.lineTo(hx - 15, noseY - 1);
+  ctx.moveTo(hx - 4, noseY + 2.5); ctx.lineTo(hx - 16, noseY + 3.5);
+  ctx.moveTo(hx - 4, noseY + 4); ctx.lineTo(hx - 14, noseY + 7.5);
+  // Right whiskers
+  ctx.moveTo(hx + 4, noseY + 1); ctx.lineTo(hx + 15, noseY - 1);
+  ctx.moveTo(hx + 4, noseY + 2.5); ctx.lineTo(hx + 16, noseY + 3.5);
+  ctx.moveTo(hx + 4, noseY + 4); ctx.lineTo(hx + 14, noseY + 7.5);
+  ctx.stroke();
+
+  // 11. MOUTH ("HUH?!")
+  const mouthY = noseY + 3.5;
   
-  const isSpriteReady = activeSprite && activeSprite.complete && activeSprite.naturalWidth > 0;
-  
-  if (isSpriteReady) {
-    // Draw authentic Ben Cat Medallion
-    ctx.save();
+  if (isAirborne || isStomping) {
+    // THE SIGNATURE ICONIC WIDE OPEN "HUH?!" MOUTH!
+    ctx.fillStyle = '#261020';
+    ctx.strokeStyle = '#0f172a';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.ellipse(hx, mouthY + 3, 3.5, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
     
-    // Attack streak when stomping
-    if (player.isStomping) {
-      ctx.shadowColor = COLORS.red;
-      ctx.shadowBlur = 20;
-    } else {
-      ctx.shadowColor = player.isJumping ? COLORS.purple : COLORS.green;
-      ctx.shadowBlur = 12;
-    }
+    // Pink Tongue
+    ctx.fillStyle = '#f472b6';
+    ctx.beginPath();
+    ctx.ellipse(hx, mouthY + 5.5, 2.5, 2.2, 0, 0, Math.PI * 2);
+    ctx.fill();
     
-    const spriteSize = w * 1.15;
-    const offX = (w - spriteSize) / 2;
-    const offY = (h - spriteSize * stretch) / 2;
-    
-    ctx.drawImage(activeSprite, offX, offY, spriteSize * squish, spriteSize * stretch);
-    ctx.restore();
+    // Two Little White Fangs
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.moveTo(hx - 2, mouthY); ctx.lineTo(hx - 1.2, mouthY + 2); ctx.lineTo(hx - 0.5, mouthY);
+    ctx.moveTo(hx + 0.5, mouthY); ctx.lineTo(hx + 1.2, mouthY + 2); ctx.lineTo(hx + 2, mouthY);
+    ctx.fill();
+  } else if (isDead) {
+    // Defeated mouth with tongue lolling
+    ctx.strokeStyle = '#0f172a';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(hx, mouthY, 3, 0, Math.PI);
+    ctx.stroke();
+    // Tongue sticking out
+    ctx.fillStyle = '#f472b6';
+    ctx.beginPath();
+    ctx.ellipse(hx + 2, mouthY + 2, 2.5, 3.5, 0.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
   } else {
-    // Procedural Fallback if sprite is still fetching
-    ctx.fillStyle = '#f5f5f5'; // Ben Cat white fur
+    // Bewildered, cute cat 'w' meow mouth
+    ctx.strokeStyle = '#0f172a';
+    ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.ellipse(w / 2, h * 0.55, w * 0.4 * squish, h * 0.38 * stretch, 0, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // Black bangs
-    ctx.fillStyle = '#1e1e1e';
+    ctx.arc(hx - 1.8, mouthY, 2, 0, Math.PI * 0.9);
+    ctx.stroke();
     ctx.beginPath();
-    ctx.ellipse(w / 2, h * 0.25, w * 0.25, h * 0.12, 0, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // Confused Eyes
-    ctx.fillStyle = '#000';
-    ctx.beginPath();
-    ctx.arc(w * 0.38, h * 0.35, 3, 0, Math.PI * 2);
-    ctx.arc(w * 0.62, h * 0.35, 3, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // HUH mouth
-    ctx.fillStyle = '#333';
-    ctx.beginPath();
-    ctx.ellipse(w / 2, h * 0.48, 4, player.isJumping ? 6 : 4, 0, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.arc(hx + 1.8, mouthY, 2, Math.PI * 0.1, Math.PI);
+    ctx.stroke();
   }
-  
+
   ctx.restore();
   ctx.globalAlpha = 1;
 }
@@ -513,6 +862,20 @@ function drawParticle(ctx: CanvasRenderingContext2D, p: Particle, camera: { x: n
     ctx.strokeStyle = '#39ff88';
     ctx.lineWidth = 1;
     ctx.strokeRect(-p.size / 2, -p.size / 2, p.size, p.size);
+  } else if (p.type === 'stomp') {
+    // Expanding neon shockwave ring
+    const expansion = 1 + (1 - alpha) * 0.8;
+    ctx.strokeStyle = '#ffd700';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.arc(x, y, (p.size * 0.7) * expansion, 0, Math.PI * 2);
+    ctx.stroke();
+    // Inner pulse
+    ctx.strokeStyle = '#ff3b5c';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(x, y, (p.size * 0.4) * expansion, 0, Math.PI * 2);
+    ctx.stroke();
   } else {
     ctx.beginPath();
     ctx.arc(x, y, p.size, 0, Math.PI * 2);
