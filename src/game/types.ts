@@ -21,6 +21,34 @@ export interface Player {
   score: number;
   combo: number;
   comboTimer: number;
+  // Game feel
+  coyoteTimer: number;
+  jumpBufferTimer: number;
+  lastSafeX: number;
+  lastSafeY: number;
+  // Orangie powerups
+  hasDoubleJump: boolean;
+  doubleJumpUsed: boolean;
+  powerupTimer: number;        // countdown for timed powerups
+  activePowerup: PowerupType | null;
+  speedBoost: number;          // combo-based speed multiplier (1.0 = normal)
+}
+
+export type PowerupType = 'doubleJump' | 'extraLife' | 'invincibility' | 'scoreMultiplier' | 'magnet';
+
+export interface Orangie {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  collected: boolean;
+  powerup: PowerupType;
+  bobTimer: number;
+  // Animation state
+  waveTimer: number;          // arm wave animation
+  happyTimer: number;         // celebration when collected (counts down)
+  flyAwayVy: number;          // upward velocity when flying away after collection
+  flyingAway: boolean;
 }
 
 export interface Mouse {
@@ -49,6 +77,7 @@ export interface Platform {
   hit?: boolean;
   destroyed?: boolean;
   coinCollected?: boolean;
+  zone?: number;  // difficulty zone (1-4) for visual theming
 }
 
 export interface Coin {
@@ -71,7 +100,7 @@ export interface Particle {
   maxLife: number;
   color: string;
   size: number;
-  type: 'huh' | 'star' | 'coin' | 'dust' | 'stomp' | 'brick';
+  type: 'huh' | 'star' | 'coin' | 'dust' | 'stomp' | 'brick' | 'orangie' | 'powerup';
   text?: string;
   rotation?: number;
 }
@@ -92,6 +121,7 @@ export interface GameState {
   mice: Mouse[];
   platforms: Platform[];
   coins: Coin[];
+  orangies: Orangie[];
   particles: Particle[];
   huhTexts: HuhText[];
   camera: Vector2;
@@ -103,6 +133,19 @@ export interface GameState {
   time: number;
   distance: number;
   highScore: number;
+  seed: number;
+  // Hitstop freeze
+  hitstopFrames: number;
+  // Orangie divine rescue
+  orangieRescueActive: boolean;
+  orangieRescueTimer: number;
+  orangieRescueUsed: boolean;
+  // Score multiplier from powerup
+  scoreMultiplier: number;
+  scoreMultiplierTimer: number;
+  // Magnet powerup
+  magnetActive: boolean;
+  magnetTimer: number;
 }
 
 export interface Keys {

@@ -1,4 +1,5 @@
-import { GameState, Player, Mouse, Platform, Coin, Particle, HuhText } from './types';
+import { GameState, Player, Mouse, Platform, Coin, Particle, HuhText, Orangie } from './types';
+import { drawOrangie, drawOrangieRescue } from './orangie';
 
 // Pre-load authentic Ben Cat sprites
 const baseUrl = import.meta.env.BASE_URL || '/';
@@ -53,6 +54,13 @@ export function render(ctx: CanvasRenderingContext2D, state: GameState, canvasWi
       drawCoin(ctx, c, camera);
     }
   });
+
+  // 3.5 Draw Orangie NPCs
+  state.orangies.forEach(o => {
+    if ((!o.collected || o.flyingAway) && o.x + o.width > camera.x - 100 && o.x < camera.x + canvasWidth + 100) {
+      drawOrangie(ctx, o, camera, state.time);
+    }
+  });
   
   // 4. Draw Robo-Mice Enemies
   state.mice.forEach(m => {
@@ -72,6 +80,16 @@ export function render(ctx: CanvasRenderingContext2D, state: GameState, canvasWi
   
   // 8. Draw Modernized Cyber HUD
   drawHUD(ctx, state, canvasWidth);
+  
+  // 9. Orangie Divine Rescue Cutscene (full screen overlay)
+  if (state.orangieRescueActive) {
+    drawOrangieRescue(ctx, state, canvasWidth, canvasHeight);
+  }
+
+  // 10. Active Powerup Badge
+  if (state.player.activePowerup) {
+    drawPowerupBadge(ctx, state, canvasWidth);
+  }
   
   ctx.restore();
 }
@@ -152,41 +170,46 @@ function drawPlatform(ctx: CanvasRenderingContext2D, p: Platform, camera: { x: n
   const y = p.y - camera.y;
   
   switch (p.type) {
-    case 'ground':
-      // Cyber Alloy Ground with Glowing Neon Emerald Top Border
-      ctx.fillStyle = '#0d111c';
+    case 'ground': {
+      const zone = p.zone || 1;
+      // Zone 1: Green/emerald (current), Zone 2: Purple/Solana, Zone 3: Red/danger, Zone 4: Gold/boss
+      const zoneColors = {
+        1: { fill: '#0d111c', rail: '#39ff88', railGlow: 'rgba(57, 255, 136, 0.4)', accent: 'rgba(57, 255, 136, 0.12)', dot: 'rgba(57, 255, 136, 0.2)' },
+        2: { fill: '#0f0b1e', rail: '#9945ff', railGlow: 'rgba(153, 69, 255, 0.4)', accent: 'rgba(153, 69, 255, 0.12)', dot: 'rgba(153, 69, 255, 0.2)' },
+        3: { fill: '#1c0d0d', rail: '#ff3b5c', railGlow: 'rgba(255, 59, 92, 0.4)', accent: 'rgba(255, 59, 92, 0.12)', dot: 'rgba(255, 59, 92, 0.2)' },
+        4: { fill: '#1c1a0d', rail: '#ffd700', railGlow: 'rgba(255, 215, 0, 0.4)', accent: 'rgba(255, 215, 0, 0.12)', dot: 'rgba(255, 215, 0, 0.2)' },
+      };
+      const c = zoneColors[zone as keyof typeof zoneColors] || zoneColors[1];
+      
+      ctx.fillStyle = c.fill;
       ctx.fillRect(x, y, p.width, p.height);
-      
-      // Neon Emerald Top Rail
-      ctx.fillStyle = COLORS.green;
+      ctx.fillStyle = c.rail;
       ctx.fillRect(x, y, p.width, 4);
-      
-      // Top Rail Glow
-      ctx.shadowColor = COLORS.green;
+      ctx.shadowColor = c.rail;
       ctx.shadowBlur = 8;
-      ctx.fillStyle = 'rgba(57, 255, 136, 0.4)';
+      ctx.fillStyle = c.railGlow;
       ctx.fillRect(x, y, p.width, 2);
       ctx.shadowBlur = 0;
-      
-      // Circuit tech accents
-      ctx.strokeStyle = 'rgba(57, 255, 136, 0.12)';
+      ctx.strokeStyle = c.accent;
       ctx.lineWidth = 1;
       for (let i = 0; i < p.width; i += 40) {
         ctx.strokeRect(x + i + 4, y + 10, 32, p.height - 18);
-        ctx.fillStyle = 'rgba(57, 255, 136, 0.2)';
+        ctx.fillStyle = c.dot;
         ctx.fillRect(x + i + 8, y + 14, 4, 4);
       }
       break;
+    }
       
-    case 'brick':
-      // Tech Server Block
+    case 'brick': {
+      const zone = p.zone || 1;
+      const borderColors: Record<number, string> = { 1: 'rgba(57, 255, 136, 0.35)', 2: 'rgba(153, 69, 255, 0.35)', 3: 'rgba(255, 59, 92, 0.35)', 4: 'rgba(255, 215, 0, 0.35)' };
+      const topColors: Record<number, string> = { 1: 'rgba(57, 255, 136, 0.6)', 2: 'rgba(153, 69, 255, 0.6)', 3: 'rgba(255, 59, 92, 0.6)', 4: 'rgba(255, 215, 0, 0.6)' };
+      
       ctx.fillStyle = '#111728';
       ctx.fillRect(x, y, p.width, p.height);
-      ctx.strokeStyle = 'rgba(57, 255, 136, 0.35)';
+      ctx.strokeStyle = borderColors[zone] || borderColors[1];
       ctx.lineWidth = 1.5;
       ctx.strokeRect(x + 1, y + 1, p.width - 2, p.height - 2);
-      
-      // Inner glowing lines
       for (let bx = 0; bx < p.width; bx += 20) {
         ctx.strokeStyle = 'rgba(153, 69, 255, 0.25)';
         ctx.beginPath();
@@ -194,10 +217,10 @@ function drawPlatform(ctx: CanvasRenderingContext2D, p: Platform, camera: { x: n
         ctx.lineTo(x + bx, y + p.height);
         ctx.stroke();
       }
-      // Top Edge Specular
-      ctx.fillStyle = 'rgba(57, 255, 136, 0.6)';
+      ctx.fillStyle = topColors[zone] || topColors[1];
       ctx.fillRect(x, y, p.width, 2);
       break;
+    }
       
     case 'question':
       // Solana Mystery Box
@@ -876,6 +899,18 @@ function drawParticle(ctx: CanvasRenderingContext2D, p: Particle, camera: { x: n
     ctx.beginPath();
     ctx.arc(x, y, (p.size * 0.4) * expansion, 0, Math.PI * 2);
     ctx.stroke();
+  } else if (p.type === 'orangie') {
+    // Orange starburst
+    ctx.translate(x, y);
+    if (p.rotation !== undefined) ctx.rotate(p.rotation);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(-p.size / 2, -1.5, p.size, 3);
+    ctx.fillRect(-1.5, -p.size / 2, 3, p.size);
+  } else if (p.type === 'powerup') {
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(x, y, p.size, 0, Math.PI * 2);
+    ctx.fill();
   } else {
     ctx.beginPath();
     ctx.arc(x, y, p.size, 0, Math.PI * 2);
@@ -974,12 +1009,32 @@ function drawHUD(ctx: CanvasRenderingContext2D, state: GameState, canvasWidth: n
   ctx.fillStyle = '#ff3b5c';
   ctx.fillText(`❤️ x${state.player.lives}`, pillX + pillW / 2, pillY + (isMobile ? 19 : 21));
   
+  if (state.player.activePowerup) {
+    const pwText = getPowerupHudText(state.player.activePowerup);
+    const pwTimer = Math.ceil(state.player.powerupTimer);
+    const pwPillW = isMobile ? 90 : 110;
+    const pwPillH = isMobile ? 22 : 26;
+    const pwPillX = canvasWidth - pwPillW - 12;
+    const pwPillY = pillY + pillH + 8;
+    
+    ctx.fillStyle = 'rgba(255, 140, 0, 0.2)';
+    ctx.fillRect(pwPillX, pwPillY, pwPillW, pwPillH);
+    ctx.strokeStyle = 'rgba(255, 140, 0, 0.6)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(pwPillX, pwPillY, pwPillW, pwPillH);
+    
+    ctx.fillStyle = '#ff8c00';
+    ctx.font = isMobile ? 'bold 9px "Space Mono", monospace' : 'bold 11px "Space Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(`🐧 ${pwText} ${pwTimer}s`, pwPillX + pwPillW / 2, pwPillY + (isMobile ? 15 : 17));
+  }
+  
   // High Score badge on desktop or wide mobile
   if (state.highScore > 0 && canvasWidth >= 420) {
     ctx.fillStyle = COLORS.gold;
     ctx.font = 'bold 11px "Space Mono", monospace';
     ctx.textAlign = 'right';
-    ctx.fillText(`HIGH: ${state.highScore}`, canvasWidth - 12, pillY + pillH + 16);
+    ctx.fillText(`HIGH: ${state.highScore}`, canvasWidth - 12, pillY + pillH + (state.player.activePowerup ? 42 : 16));
   }
   
   // Center: Active Combo Banner
@@ -993,5 +1048,31 @@ function drawHUD(ctx: CanvasRenderingContext2D, state: GameState, canvasWidth: n
     ctx.shadowBlur = 0;
   }
   
+  if (state.scoreMultiplier > 1) {
+    ctx.save();
+    ctx.shadowColor = '#ffd700';
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = '#ffd700';
+    ctx.font = isMobile ? 'bold 14px "Syne", sans-serif' : 'bold 18px "Syne", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`⚡ ${state.scoreMultiplier}× SCORE ⚡`, canvasWidth / 2, isMobile ? 50 : 60);
+    ctx.shadowBlur = 0;
+    ctx.restore();
+  }
+  
   ctx.restore();
+}
+
+function drawPowerupBadge(ctx: CanvasRenderingContext2D, state: GameState, canvasWidth: number) {
+  // Provided for compatibility with render calls; logic is integrated into drawHUD
+}
+
+function getPowerupHudText(powerup: string): string {
+  switch (powerup) {
+    case 'doubleJump': return 'DBL JMP';
+    case 'invincibility': return 'SHIELD';
+    case 'scoreMultiplier': return '×2 PTS';
+    case 'magnet': return 'MAGNET';
+    default: return '';
+  }
 }

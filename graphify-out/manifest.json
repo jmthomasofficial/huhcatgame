@@ -1,0 +1,177 @@
+{
+  "package.json": {
+    "mtime": 1789485917.5631955,
+    "ast_hash": "6f70d71fec50142339867827c8ef66f1",
+    "semantic_hash": ""
+  },
+  "public/onchain-sprite.json": {
+    "mtime": 1789495878.1546395,
+    "ast_hash": "dcb4c50006e4b4f75b6b40743573f877",
+    "semantic_hash": ""
+  },
+  "src/App.tsx": {
+    "mtime": 1789485917.581973,
+    "ast_hash": "949ff35b1241cadd8a95ad482f34b525",
+    "semantic_hash": ""
+  },
+  "src/game/HuhcatGame.tsx": {
+    "mtime": 1789499493.113697,
+    "ast_hash": "47b7d0c14465b4320f6a3057230a7458",
+    "semantic_hash": ""
+  },
+  "src/game/audio.ts": {
+    "mtime": 1789489866.797154,
+    "ast_hash": "05b98fae01400d54529bcbb9cc0756b7",
+    "semantic_hash": ""
+  },
+  "src/game/chain.ts": {
+    "mtime": 1789496018.2012622,
+    "ast_hash": "68d1f53dfd5ee43c906f10a3f206a29f",
+    "semantic_hash": ""
+  },
+  "src/game/engine.ts": {
+    "mtime": 1789499330.3264947,
+    "ast_hash": "6301c64ba66f7927229be99959bfeae2",
+    "semantic_hash": ""
+  },
+  "src/game/levelGenerator.ts": {
+    "mtime": 1789499303.6301377,
+    "ast_hash": "62ebc3bf2a9ba85de2eb2292d8215567",
+    "semantic_hash": ""
+  },
+  "src/game/orangie.ts": {
+    "mtime": 1789499312.6310139,
+    "ast_hash": "c55a830f0ec9ea8f93e970e74de6e5ed",
+    "semantic_hash": ""
+  },
+  "src/game/renderer.ts": {
+    "mtime": 1789499567.487353,
+    "ast_hash": "4a2828977df21498bccf08e3c8173fc9",
+    "semantic_hash": ""
+  },
+  "src/game/types.ts": {
+    "mtime": 1789499093.1307833,
+    "ast_hash": "9cd5dbc9f70827bee0df1ff23264a9e3",
+    "semantic_hash": ""
+  },
+  "src/main.tsx": {
+    "mtime": 1789485917.5861497,
+    "ast_hash": "21880a50f3ecd078d4815f5b8ee5e237",
+    "semantic_hash": ""
+  },
+  "src/vite-env.d.ts": {
+    "mtime": 1789485917.586165,
+    "ast_hash": "8f68c27c3fc38817b2726b20e2d4f1ee",
+    "semantic_hash": ""
+  },
+  "tsconfig.json": {
+    "mtime": 1789485917.5866854,
+    "ast_hash": "30695bd357a55ab8a0ebacb56fa49462",
+    "semantic_hash": ""
+  },
+  "vite.config.js": {
+    "mtime": 1789485917.5872116,
+    "ast_hash": "6ee368703cf98b70533ebae9ee95e15f",
+    "semantic_hash": ""
+  },
+  ".github/workflows/deploy.yml": {
+    "mtime": 1789485950.6955428,
+    "ast_hash": "990dad41385407f8cef3eb84175d59e5",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1789480839.0815272,
+    "ast_hash": "ae0d366decb96cf1ab63e32c8de11891",
+    "semantic_hash": ""
+  },
+  "handoff.md": {
+    "mtime": 1789499709.8318892,
+    "ast_hash": "c7e781d36062456f6b56b73d0b6f9365",
+    "semantic_hash": ""
+  },
+  "index.html": {
+    "mtime": 1789495563.41503,
+    "ast_hash": "819109fef2db7fb2acfe7461d461a575",
+    "semantic_hash": ""
+  },
+  "orangie.jpg": {
+    "mtime": 1789497970.6303008,
+    "ast_hash": "793ce37d038666ea28dcd01ca080c6f6",
+    "semantic_hash": ""
+  },
+  "public/cat_dead.png": {
+    "mtime": 1789485917.5641978,
+    "ast_hash": "1d790395a67e58d522c51e9d944563cf",
+    "semantic_hash": ""
+  },
+  "public/cat_huh.png": {
+    "mtime": 1789485917.5641978,
+    "ast_hash": "6b087f1b5587dd5b714da0de7e7ff23d",
+    "semantic_hash": ""
+  },
+  "public/cat_idle.png": {
+    "mtime": 1789485917.565225,
+    "ast_hash": "d3e8dee30b395564cb4f1dd6e8482c7b",
+    "semantic_hash": ""
+  },
+  "public/chart-drawing-cat.jpg": {
+    "mtime": 1789485917.5662208,
+    "ast_hash": "404e0f1298134a0e959d61981b86c74a",
+    "semantic_hash": ""
+  },
+  "public/hero-pounce.jpg": {
+    "mtime": 1789488626.5669973,
+    "ast_hash": "703624079cc7553207df6ed2825c8d3c",
+    "semantic_hash": ""
+  },
+  "public/huhcat-hero.jpg": {
+    "mtime": 1789485917.5711956,
+    "ast_hash": "3502c079ee1e1cbed96d0528e49764ab",
+    "semantic_hash": ""
+  },
+  "public/huhcat.png": {
+    "mtime": 1789485917.5721962,
+    "ast_hash": "de2bdea86761aa7fc2c2e360bed81904",
+    "semantic_hash": ""
+  },
+  "public/og-image.jpg": {
+    "mtime": 1789485917.574542,
+    "ast_hash": "32e3a523771c864f7a53d6a51e8445a3",
+    "semantic_hash": ""
+  },
+  "public/orangie.jpg": {
+    "mtime": 1789497970.6303008,
+    "ast_hash": "793ce37d038666ea28dcd01ca080c6f6",
+    "semantic_hash": ""
+  },
+  "public/splash.jpg": {
+    "mtime": 1789485917.5809162,
+    "ast_hash": "11f15c799e79c153440465e1d97c6611",
+    "semantic_hash": ""
+  },
+  "screenshot-titlescreen.jpg": {
+    "mtime": 1789493707.5328739,
+    "ast_hash": "cb9cb5d7b2bb395b0a0aeae5830bbe09",
+    "semantic_hash": ""
+  },
+  "public/bgm.mp3": {
+    "mtime": 1789133961.2191017,
+    "ast_hash": "493f8a180871c005e46503e51c2a893f",
+    "semantic_hash": ""
+  },
+  "public/huh.mp3": {
+    "mtime": 1789485917.5662208,
+    "ast_hash": "3cdc51b66efe5ccf17424ac1d4a2a615",
+    "semantic_hash": ""
+  },
+  "public/huh.wav": {
+    "mtime": 1789485917.567197,
+    "ast_hash": "b3ac4692cd6ab66636a3aff116c7facd",
+    "semantic_hash": ""
+  },
+  "public/huh2.mp3": {
+    "mtime": 1789485917.5681982,
+    "ast_hash": "e2a0cb29ed845651b7fc8e2d43d785a5",
+    "semantic_hash": ""
+  }
+}

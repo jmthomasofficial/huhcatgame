@@ -1,53 +1,49 @@
-# HUHCAT Game Handoff — Steam Hero Artwork, Instant Authentic "HUH?!" Audio, Viral Conversion Hub & Animated Ben Sprites
+# HUHCAT Game Handoff — Full Game Overhaul: Orangie Powerup System, Bug Fixes, Level Rewrite
 
 **Date**: 2026-09-15  
 **Project**: HUHCAT Game (`g:\JMXTHEGHOST\huhcatgame`)  
 **Live Public Game URL**: https://jmthomasofficial.github.io/huhcatgame/  
-**Live OG Social Card**: https://jmthomasofficial.github.io/huhcatgame/og-image.jpg  
 **GitHub Repository**: https://github.com/jmthomasofficial/huhcatgame  
-**Status**: 100% Live, Verified & Operational  
+**Status**: All code changes complete, builds clean, needs deploy
 
 ---
 
-## 1. Latest Fix: Hero Key Art Path Resolution on GitHub Pages
-- **Issue**: The Steam-quality hero artwork (`hero-pounce.jpg`) at the top center of the title screen was displaying a broken image icon with alt text `HUHCAT Pouncing on Robo-Mouse` on the live site.
-- **Root Cause**: In `src/game/HuhcatGame.tsx`, the image was referenced via an absolute root path `src="/hero-pounce.jpg"`. On GitHub Pages (subpath `/huhcatgame/`), the browser resolved this to domain root `https://jmthomasofficial.github.io/hero-pounce.jpg` (HTTP 404).
-- **Resolution**:
-  - Defined `cleanBase` helper in `HuhcatGame.tsx` utilizing `import.meta.env.BASE_URL` (matching `vite.config.js` `base: './'`).
-  - Converted all public image paths (`hero-pounce.jpg`, `splash.jpg`, `cat_idle.png`, `cat_dead.png`) to use `${cleanBase}...`.
-  - Added fail-safe fallback `onError` handler on the hero image to guarantee direct resolution.
-  - Deployed to GitHub Pages via commit `9a688ca` and verified via Playwright live browser inspection (`naturalWidth: 1376px`, HTTP 200 OK).
+## Summary of This Session
 
----
+### Major Changes Made
+1. **Fixed ALL platform overlap bugs** — Segment B (staircase) rewritten with thin step platforms, Segment D bricks raised for proper clearance, post-generation overlap validator added
+2. **Fixed respawn death loop** — Tracks lastSafeX/Y, respawns on solid ground
+3. **Fixed frame-rate dependent physics** — All physics scaled by dt*60
+4. **Fixed stomp tunneling** — Previous-frame position check for reliable stomps
+5. **Fixed side collision** — Least-penetration push-out
+6. **Added Orangie penguin character** — Full canvas-drawn animated sprite (orange beanie, black hoodie, blue accents, "R" logo) as a friendly in-game NPC
+7. **5 powerup types**: Double Jump (30s), Extra Life, Invincibility (8s), 2× Score (20s), Coin Magnet (15s)
+8. **Orangie Divine Rescue cutscene** — After 9th death, Orangie descends from glowing sun to grant +1 life (one-time per run)
+9. **Coyote time + Jump buffer + Variable jump height** — Much better game feel
+10. **Hitstop on stomp** — 3-frame freeze for punch
+11. **8 level segment types** (4 new: Vertical Shaft, Speed Run Corridor, Puzzle Pit, Orangie's Shrine)
+12. **4 difficulty zones** with themed platform colors (green → purple → red → gold)
+13. **Seeded level generation** — Reproducible levels, seed displayed on game over with copy button
+14. **Powerup HUD** — Active powerup badge with countdown timer
 
-## 2. Completed Feature Manifest
+### Files Modified
+- `src/game/types.ts` — All new types (Orangie, PowerupType, expanded Player/GameState)
+- `src/game/levelGenerator.ts` — Complete rewrite
+- `src/game/engine.ts` — Complete rewrite  
+- `src/game/orangie.ts` — NEW file (canvas sprite + rescue cutscene)
+- `src/game/renderer.ts` — Zone colors, Orangie rendering, powerup HUD
+- `src/game/HuhcatGame.tsx` — Orangie rescue guard, seed display
+- `public/orangie.jpg` — Asset copied from root
 
-### A. Steam-Quality Key Art (Top Center of Title Screen)
-- Original AAA cinematic artwork of Ben the HUHCAT pouncing mid-air onto a glowing cyber robo-mouse (`public/hero-pounce.jpg`).
-- Styled with cyber glass border, emerald glow, and dual metadata pills (`🐾 BEN CAT vs ROBO-MICE` | `SOLANA ARCADE`).
+### Build Status
+- TypeScript: 0 errors
+- Vite build: ✓ 34 modules, 858ms
+- Dev server tested at http://localhost:3000/
 
-### B. Instant Authentic Ben Cat "HUH?!" Audio
-- Direct MP3 playback of authentic Ben Cat vocal samples (`huh.mp3`, `huh2.mp3`) with synthetic oscillator fallback completely eliminated.
-- Audio buffers preloaded on module load and component mount; first click triggers instant authentic meow.
-
-### C. High-Conversion Viral Stack
-- **Buy $HUHCAT on Pumpfun**: Solana gradient button with glowing `"🎁 Get FREE Solana Just for Holding!"` incentive badge (`https://pump.fun/coin/A9AHYeqb7nQk7LZUraw7rBCzYRjy2DRvE6NqWfFHKRdH`).
-- **Official Website**: Cyber glassmorphic button (`https://jmthomasofficial.github.io/huhcat/`).
-- **Verified Contract Address (CA)**: Centered card with 1-click copy feedback and DexScreener chart link.
-- **Official Telegram Group**: Direct link to community chat (`https://t.me/+Bzr4QWDYuMo3ZmVh`).
-- **Viral 1-Click "Share on X"**: Dynamic tweet generator embedding active score, game URL, CA, and 1200x630 OG social preview card.
-
-### D. Authentic Animated HUHCAT Character Sprites
-- Procedural 2D animated arcade sprite system in `src/game/renderer.ts`:
-  - Ben's bowl-cut bangs, pink inner ears, amber eyes, and dorsal saddle patch.
-  - 4-frame running cycle with head sway and bezier tail swishing.
-  - Leaping pose with wide-open "HUH?!" mouth.
-  - Stomp attack diving posture with fiery speedlines and shockwave particle rings.
-  - Defeat and victory animations.
-
----
-
-## 3. Key Assets & Verification
-- `hero-pounce.jpg`: 989,237 bytes (HTTP 200 at `https://jmthomasofficial.github.io/huhcatgame/hero-pounce.jpg`)
-- `og-image.jpg`: 344,758 bytes (HTTP 200 at `https://jmthomasofficial.github.io/huhcatgame/og-image.jpg`)
-- Live title screen capture: `scratch/live_title_screen.png`
+### What's NOT Done Yet (Future Tasks)
+- Achievements/badges system (localStorage)
+- Pause menu (Escape key)
+- Wall slide / wall jump
+- Environmental audio cues
+- Global leaderboard (needs backend)
+- Hard Mode unlock after first win

@@ -236,8 +236,8 @@ export default function HuhcatGame() {
         setHuhCount(stompedCount);
       }
 
-      // Check game state changes
-      if (state.gameOver) {
+      // Check game state changes (don't end game during Orangie rescue!)
+      if (state.gameOver && !state.orangieRescueActive) {
         setScore(state.player.score);
         setHighScore(state.highScore);
         setGameScreen('gameover');
@@ -571,6 +571,23 @@ export default function HuhcatGame() {
                     🏆 NEW HIGH SCORE RECORD! 🏆
                   </div>
                 )}
+
+                {gameStateRef.current.orangieRescueUsed && (
+                  <div className="bg-orange-500/10 border border-orange-500/30 text-orange-300 font-mono text-[10px] sm:text-xs py-1 sm:py-1.5 px-3 rounded-lg mb-2 sm:mb-4">
+                    🐧 Orangie saved you once this run!
+                  </div>
+                )}
+
+                {/* Level Seed for sharing */}
+                <div className="flex items-center justify-center gap-2 mb-2 sm:mb-4">
+                  <span className="text-[9px] sm:text-[10px] font-mono text-zinc-500">SEED: {gameStateRef.current.seed}</span>
+                  <button
+                    onClick={() => { navigator.clipboard.writeText(String(gameStateRef.current.seed)); }}
+                    className="px-1.5 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-[9px] font-mono text-zinc-400 transition-colors cursor-pointer"
+                  >
+                    📋 Copy
+                  </button>
+                </div>
 
                 <div className="flex flex-col gap-1.5 sm:gap-2">
                   <button
