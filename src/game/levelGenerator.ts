@@ -259,7 +259,7 @@ export function generateLevel(seed: number): { platforms: Platform[]; mice: Mous
       const numBlocks = 4 + Math.floor(Math.random() * 4);
       const blockWidth = 40;
       const blockHeight = 35;
-      const blockY = groundY - 125; // 125px vertical clearance, jump reaches 140px
+      const blockY = groundY - 180; // high enough to run under, still smashable on a jump
       const sectionWidth = numBlocks * blockWidth + 160;
       
       // Continuous ground
