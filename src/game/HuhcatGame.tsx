@@ -298,52 +298,56 @@ export default function HuhcatGame() {
             style={{ imageRendering: 'auto' }}
           />
 
-          {/* TITLE SCREEN MODAL */}
+          {/* TITLE SCREEN / SPLASH SCREEN */}
           {gameScreen === 'title' && (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#04050a]/92 backdrop-blur-md p-6 rounded-xl border border-[#39ff88]/20">
-              <div className="max-w-md w-full text-center flex flex-col items-center">
-                {/* Hero Medallion */}
-                <div className="relative mb-4 group cursor-pointer" onClick={handleTestHuh}>
-                  <div className="w-28 h-28 md:w-32 md:h-32 rounded-full p-1 bg-gradient-to-tr from-[#39ff88] via-[#9945ff] to-[#39ff88] pulse-emerald animate-float">
-                    <img
-                      src="/cat_idle.png"
-                      alt="HUHCAT"
-                      className="w-full h-full rounded-full object-cover bg-black"
-                    />
-                  </div>
-                  <span className="absolute -bottom-2 bg-red-600 text-white font-bold text-xs px-2 py-0.5 rounded-full border border-white shadow-lg animate-bounce">
-                    HUH?!
-                  </span>
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-end md:justify-center p-4 md:p-8 rounded-xl overflow-hidden border border-[#39ff88]/30 shadow-[0_0_60px_rgba(57,255,136,0.2)]">
+              {/* Background Splash Image with Cinematic Ambient Zoom */}
+              <img
+                src="/splash.jpg"
+                alt="HUHCAT: Mice & Mayhem"
+                className="absolute inset-0 w-full h-full object-cover object-center animate-subtle-zoom"
+              />
+              
+              {/* Vignette & Scanline Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#04050a] via-[#04050a]/60 to-transparent" />
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_40%,_#04050a_95%)] pointer-events-none" />
+              <div className="absolute inset-0 scanline opacity-25 pointer-events-none" />
+
+              {/* Title Screen Foreground Content */}
+              <div className="relative z-10 max-w-lg w-full text-center flex flex-col items-center mb-2 md:mb-0">
+                {/* Status Pill */}
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/60 border border-[#39ff88]/50 backdrop-blur-md text-[11px] font-mono text-[#39ff88] uppercase tracking-widest mb-3 shadow-lg">
+                  <span className="w-2 h-2 rounded-full bg-[#39ff88] animate-ping" />
+                  Official Solana V1 Arcade Experience
                 </div>
 
-                <h1 className="text-4xl md:text-5xl font-extrabold font-syne tracking-tight grad-text mb-1">
-                  $HUHCAT
+                {/* Main 3D Title */}
+                <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold font-syne tracking-tight text-white drop-shadow-[0_0_25px_rgba(57,255,136,0.8)] mb-1">
+                  HUHCAT
                 </h1>
-                <p className="text-xs md:text-sm font-mono text-[#39ff88] tracking-widest uppercase mb-4">
-                  Mice &amp; Mayhem • Official Solana V1 Arcade
+                <p className="text-sm sm:text-base md:text-lg font-mono font-bold tracking-wider grad-text uppercase mb-4 drop-shadow-md">
+                  ⚔️ MICE &amp; MAYHEM ⚔️
                 </p>
 
-                {/* Controls Card */}
-                <div className="w-full bg-[#0d111c]/90 border border-white/10 rounded-xl p-3.5 mb-5 text-left font-mono text-xs text-zinc-300 space-y-1.5 shadow-xl">
-                  <div className="flex justify-between items-center text-[#39ff88] border-b border-white/5 pb-1 font-bold">
-                    <span>MISSION BRIEFING</span>
-                    <span>v1.0 LIVE</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-zinc-400">MOVE</span>
-                    <span className="text-white font-bold">A / D or ⬅️ ➡️</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-zinc-400">JUMP &amp; HUH</span>
-                    <span className="text-white font-bold">SPACE or W (Vocal Meow)</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-zinc-400">COMBAT</span>
-                    <span className="text-yellow-400 font-bold">Stomp Robo-Mice for Combos</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-zinc-400">LOOT</span>
-                    <span className="text-[#39ff88] font-bold">Solana Coins ($S) &amp; Fish</span>
+                {/* Briefing Mini-Card */}
+                <div className="w-full bg-[#0d111c]/85 border border-white/15 backdrop-blur-md rounded-xl p-3 mb-5 font-mono text-xs text-zinc-300 shadow-2xl">
+                  <div className="grid grid-cols-2 gap-2 text-left">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-zinc-500">MOVE:</span>
+                      <span className="text-white font-bold">A / D or ⬅️ ➡️</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-zinc-500">JUMP &amp; MEOW:</span>
+                      <span className="text-[#39ff88] font-bold">SPACE (HUH!)</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-zinc-500">COMBAT:</span>
+                      <span className="text-yellow-400 font-bold">Stomp Robo-Mice</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-zinc-500">LOOT:</span>
+                      <span className="text-purple-400 font-bold">$S Solana Coins</span>
+                    </div>
                   </div>
                 </div>
 
@@ -351,57 +355,63 @@ export default function HuhcatGame() {
                 <div className="flex flex-col sm:flex-row gap-3 w-full justify-center">
                   <button
                     onClick={startGame}
-                    className="flex-1 py-3.5 px-6 rounded-xl bg-gradient-to-r from-[#39ff88] to-[#00d15c] text-[#001a0a] font-extrabold font-syne text-base tracking-wider hover:shadow-[0_0_30px_rgba(57,255,136,0.6)] hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                    className="flex-1 py-3.5 px-6 rounded-xl bg-gradient-to-r from-[#39ff88] via-[#00ff87] to-[#00d15c] text-[#001a0a] font-black font-syne text-base tracking-widest hover:shadow-[0_0_35px_rgba(57,255,136,0.8)] hover:scale-105 active:scale-95 transition-all cursor-pointer shadow-xl flex items-center justify-center gap-2"
                   >
-                    ▶ PLAY GAME
+                    <span>▶</span>
+                    <span>START GAME</span>
                   </button>
 
                   <button
                     onClick={handleTestHuh}
-                    className="py-3.5 px-5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-zinc-200 font-mono text-xs font-bold flex items-center justify-center gap-2 hover:border-[#39ff88] transition-all cursor-pointer"
-                    title="Play the real cat vocalization sample"
+                    className="py-3.5 px-5 rounded-xl bg-black/60 hover:bg-black/80 border border-[#39ff88]/40 hover:border-[#39ff88] text-[#39ff88] font-mono text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer backdrop-blur-md shadow-lg"
+                    title="Trigger the iconic Ben Cat vocalization"
                   >
                     <span>🔊</span> TEST REAL "HUH"
                   </button>
                 </div>
 
-                {highScore > 0 && (
-                  <p className="text-xs font-mono text-yellow-400 mt-4">
-                    🏆 ON-CHAIN RECORD: {highScore} PTS
-                  </p>
-                )}
+                {/* Score & Start Notice */}
+                <div className="flex items-center justify-between w-full px-2 mt-3 text-[11px] font-mono text-zinc-400">
+                  <span>{highScore > 0 ? `🏆 RECORD: ${highScore} PTS` : 'READY PLAYER ONE'}</span>
+                  <span className="text-[#39ff88] animate-pulse">PRESS SPACE TO PLAY</span>
+                </div>
               </div>
             </div>
           )}
 
           {/* GAME OVER SCREEN */}
           {gameScreen === 'gameover' && (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#04050a]/92 backdrop-blur-md p-6 rounded-xl border border-red-500/30">
-              <div className="max-w-sm w-full text-center">
-                <div className="w-20 h-20 mx-auto rounded-full p-1 bg-red-500/20 border-2 border-red-500 mb-3 flex items-center justify-center">
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#04050a]/90 backdrop-blur-md p-6 rounded-xl border border-red-500/30 overflow-hidden">
+              <img
+                src="/splash.jpg"
+                alt="HUHCAT"
+                className="absolute inset-0 w-full h-full object-cover object-center opacity-20 blur-sm pointer-events-none"
+              />
+              <div className="relative z-10 max-w-sm w-full text-center">
+                <div className="w-20 h-20 mx-auto rounded-full p-1 bg-red-500/20 border-2 border-red-500 mb-3 flex items-center justify-center shadow-[0_0_30px_rgba(255,59,92,0.4)]">
                   <img src="/cat_dead.png" alt="Defeated" className="w-full h-full rounded-full object-cover" />
                 </div>
 
-                <h2 className="text-3xl md:text-4xl font-extrabold font-syne text-red-500 mb-1">
+                <h2 className="text-3xl md:text-4xl font-extrabold font-syne text-red-500 mb-1 tracking-tight">
                   MISSION FAILED
                 </h2>
-                <p className="text-xs font-mono text-zinc-400 mb-4">Ben Cat caught a glitch in the matrix.</p>
+                <p className="text-xs font-mono text-zinc-400 mb-4">Ben Cat overloaded by robo-mice swarm.</p>
 
                 {/* Stat Grid */}
-                <div className="grid grid-cols-2 gap-2 bg-[#0d111c] border border-white/10 rounded-xl p-3 mb-5 font-mono text-xs">
-                  <div className="p-2 bg-black/40 rounded-lg">
+                <div className="grid grid-cols-2 gap-2 bg-[#0d111c]/90 border border-white/10 rounded-xl p-3 mb-5 font-mono text-xs backdrop-blur-md">
+                  <div className="p-2 bg-black/50 rounded-lg">
                     <span className="text-zinc-500 block">FINAL SCORE</span>
                     <span className="text-lg font-bold text-[#39ff88]">{score}</span>
                   </div>
-                  <div className="p-2 bg-black/40 rounded-lg">
+                  <div className="p-2 bg-black/50 rounded-lg">
                     <span className="text-zinc-500 block">DISTANCE</span>
                     <span className="text-lg font-bold text-purple-400">{Math.floor(gameStateRef.current.distance)}m</span>
                   </div>
-                  <div className="p-2 bg-black/40 rounded-lg">
-                    <span className="text-zinc-500 block">MICE ELIMINATED</span>
+                  <div className="p-2 bg-black/50 rounded-lg">
+                    <span className="text-zinc-500 block">MICE DELETED</span>
                     <span className="text-lg font-bold text-cyan-400">{gameStateRef.current.mice.filter(m => !m.isAlive).length}</span>
                   </div>
-                  <div className="p-2 bg-black/40 rounded-lg">
+                  <div className="p-2 bg-black/50 rounded-lg">
                     <span className="text-zinc-500 block">TOTAL "HUH"s</span>
                     <span className="text-lg font-bold text-yellow-400">{huhCount}</span>
                   </div>
@@ -416,7 +426,7 @@ export default function HuhcatGame() {
                 <div className="flex flex-col gap-2">
                   <button
                     onClick={restartGame}
-                    className="w-full py-3 rounded-xl bg-gradient-to-r from-[#39ff88] to-[#00d15c] text-[#001a0a] font-extrabold font-syne text-sm tracking-wider hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-[#39ff88] to-[#00d15c] text-[#001a0a] font-extrabold font-syne text-sm tracking-wider hover:scale-105 active:scale-95 transition-all cursor-pointer shadow-lg"
                   >
                     🔄 RETRY MISSION
                   </button>
@@ -436,8 +446,13 @@ export default function HuhcatGame() {
 
           {/* WIN SCREEN */}
           {gameScreen === 'win' && (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#04050a]/92 backdrop-blur-md p-6 rounded-xl border border-[#39ff88]/40">
-              <div className="max-w-sm w-full text-center">
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#04050a]/90 backdrop-blur-md p-6 rounded-xl border border-[#39ff88]/40 overflow-hidden">
+              <img
+                src="/splash.jpg"
+                alt="HUHCAT"
+                className="absolute inset-0 w-full h-full object-cover object-center opacity-25 blur-sm pointer-events-none"
+              />
+              <div className="relative z-10 max-w-sm w-full text-center">
                 <div className="w-24 h-24 mx-auto rounded-full p-1 bg-gradient-to-tr from-[#39ff88] to-yellow-400 pulse-emerald mb-3">
                   <img src="/cat_idle.png" alt="Victory" className="w-full h-full rounded-full object-cover" />
                 </div>
@@ -445,9 +460,9 @@ export default function HuhcatGame() {
                 <h2 className="text-3xl md:text-4xl font-extrabold font-syne grad-text mb-1">
                   ON-CHAIN LEGEND!
                 </h2>
-                <p className="text-xs font-mono text-[#39ff88] mb-4">All mice cleared. The blockchain is secured.</p>
+                <p className="text-xs font-mono text-[#39ff88] mb-4">Mice cleared. Blockchain secured in Ben Cat's name.</p>
 
-                <div className="bg-[#0d111c] border border-white/10 rounded-xl p-3 mb-5 font-mono text-xs text-left space-y-1">
+                <div className="bg-[#0d111c]/90 border border-white/10 rounded-xl p-3 mb-5 font-mono text-xs text-left space-y-1 backdrop-blur-md">
                   <div className="flex justify-between"><span className="text-zinc-400">SCORE:</span><span className="text-[#39ff88] font-bold">{score}</span></div>
                   <div className="flex justify-between"><span className="text-zinc-400">TOTAL HUHs:</span><span className="text-yellow-400 font-bold">{huhCount} 🗣️</span></div>
                   <div className="flex justify-between"><span className="text-zinc-400">STATUS:</span><span className="text-cyan-400 font-bold">100% INSCRIBED</span></div>
@@ -456,7 +471,7 @@ export default function HuhcatGame() {
                 <div className="flex flex-col gap-2">
                   <button
                     onClick={restartGame}
-                    className="w-full py-3 rounded-xl bg-gradient-to-r from-[#39ff88] to-[#00d15c] text-[#001a0a] font-extrabold font-syne text-sm tracking-wider hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-[#39ff88] to-[#00d15c] text-[#001a0a] font-extrabold font-syne text-sm tracking-wider hover:scale-105 active:scale-95 transition-all cursor-pointer shadow-lg"
                   >
                     🎮 PLAY AGAIN
                   </button>
