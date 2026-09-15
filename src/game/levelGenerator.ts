@@ -64,7 +64,7 @@ export function generateLevel(seed: number): { platforms: Platform[]; mice: Mous
       const numPlatforms = 1 + Math.floor(Math.random() * 2);
       for (let i = 0; i < numPlatforms; i++) {
         const platX = x - gapWidth + (gapWidth / (numPlatforms + 1)) * (i + 1) - 35;
-        const platY = groundY - 140 - Math.random() * 30;
+        const platY = groundY - 50 - Math.random() * 40;
         
         // Use 'cloud' or 'question' so platforms over gaps are stable
         const platType = Math.random() < 0.5 ? 'cloud' : 'question';
@@ -120,11 +120,10 @@ export function generateLevel(seed: number): { platforms: Platform[]; mice: Mous
       
       x += groundWidth;
     } else if (segmentRoll < 0.52) {
-      // SEGMENT B: Floating stair boxes (air underneath so you can run under and jump)
+      // SEGMENT B: Solid Stepped Hill / Mountain (NO hollow traps or low ceilings)
       const steps = 3 + Math.floor(Math.random() * 2); // 3 to 4 steps
       const stepWidth = 55;
-      const stepHeight = 70;
-      const stepPlatH = 28;
+      const stepHeight = 32;
       const hillBaseWidth = (steps * 2 + 1) * stepWidth + 60;
       
       // Continuous ground under entire mountain section
@@ -136,37 +135,42 @@ export function generateLevel(seed: number): { platforms: Platform[]; mice: Mous
         type: 'ground'
       });
       
+      // Solid ascending steps (each step is solid down to groundY)
       for (let i = 0; i < steps; i++) {
-        const stepY = groundY - 85 - i * stepHeight;
+        const stepY = groundY - (i + 1) * stepHeight;
+        // Ascending step
         platforms.push({
           x: x + 30 + i * stepWidth,
           y: stepY,
           width: stepWidth,
-          height: stepPlatH,
+          height: groundY - stepY + 40,
           type: 'ground'
         });
         
+        // Descending step
         platforms.push({
           x: x + hillBaseWidth - 30 - (i + 1) * stepWidth,
           y: stepY,
           width: stepWidth,
-          height: stepPlatH,
+          height: groundY - stepY + 40,
           type: 'ground'
         });
       }
       
-      const peakY = groundY - 85 - steps * stepHeight;
+      // Peak summit platform
+      const peakY = groundY - (steps + 1) * stepHeight;
       platforms.push({
         x: x + 30 + steps * stepWidth,
         y: peakY,
         width: stepWidth,
-        height: stepPlatH,
+        height: groundY - peakY + 40,
         type: 'ground'
       });
       
+      // Floating breakable bricks and prize coins high above peak
       platforms.push({
         x: x + 30 + steps * stepWidth,
-        y: peakY - 90,
+        y: peakY - 80,
         width: 40,
         height: 35,
         type: 'question',
@@ -176,7 +180,7 @@ export function generateLevel(seed: number): { platforms: Platform[]; mice: Mous
       
       coins.push({
         x: x + 30 + steps * stepWidth + 10,
-        y: peakY - 135,
+        y: peakY - 125,
         width: 20,
         height: 20,
         collected: false,
@@ -255,7 +259,7 @@ export function generateLevel(seed: number): { platforms: Platform[]; mice: Mous
       const numBlocks = 4 + Math.floor(Math.random() * 4);
       const blockWidth = 40;
       const blockHeight = 35;
-      const blockY = groundY - 200; // high enough to run under, still smashable on a jump
+      const blockY = groundY - 180; // high enough to run under, still smashable on a jump
       const sectionWidth = numBlocks * blockWidth + 160;
       
       // Continuous ground
