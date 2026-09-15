@@ -5,16 +5,20 @@
 **Repository**: https://github.com/jmthomasofficial/huhcatgame  
 **Pull Request**: https://github.com/jmthomasofficial/huhcatgame/pull/1  
 **Branch**: `huhcat--mice---mayhem-0b06d`  
-**Latest Commit**: `656d33f` (Pushed & Live on GitHub)  
+**Latest Commit**: `e4023f3` (Pushed & Live on GitHub)  
 **Status**: 100% Implemented, Verified & Deployed to PR Branch  
 
 ---
 
 ## 1. Summary of Actions
+- **Badass Custom Splash Screen & AAA Title Theme**:
+  - Generated custom 8K game cover key art featuring Ben Cat in futuristic cyber armor stepping on defeated robotic mice with glowing red optics amidst floating Solana medallions and volumetric emerald laser beams (`public/splash.jpg`).
+  - Integrated full-bleed cinematic title screen with subtle ambient zoom (`.animate-subtle-zoom`), retro arcade scanlines (`.scanline`), and dark cyber glass vignette.
+  - Implemented responsive controls HUD, "PRESS SPACE TO PLAY" listener, and interactive "TEST REAL HUH" sound trigger.
+  - Mirrored cinematic splash backdrop with blur and thematic lighting into Game Over (red alert) and Victory (emerald gold) screens.
 - **Authentic Ben Cat Vocal Audio**:
   - Extracted, isolated, and normalized the iconic "HUH?!" cat vocalization directly from `huhcat-video.mp4` (`0.12s–0.58s` and `0.88s–1.34s`) into `public/huh.mp3` and `public/huh2.mp3`.
   - Upgraded `src/game/audio.ts` with Web Audio API `AudioBuffer` preloading and decoding for instant, zero-latency playback on keypress/touch with pitch modulation and synth fallback.
-  - Added interactive "TEST REAL HUH" button on the title screen.
 - **Authentic Character Sprites**:
   - Replaced generic orange canvas cat with real Ben Cat / $HUHCAT textures:
     - `public/cat_idle.png`: Classic confused Ben Cat medallion with glowing emerald rim.
@@ -35,6 +39,7 @@
 ---
 
 ## 2. File Manifest
+- `public/splash.jpg`: 8K custom cinematic game splash & title screen artwork.
 - `public/huh.mp3`: Authentic Ben Cat vocalization audio sample #1.
 - `public/huh2.mp3`: Authentic Ben Cat vocalization audio sample #2.
 - `public/huh.wav`: Uncompressed WAV master.
@@ -46,6 +51,6 @@
 - `src/game/audio.ts`: Web Audio API buffer engine.
 - `src/game/renderer.ts`: 2D canvas cyberpunk rendering loop.
 - `src/game/HuhcatGame.tsx`: Main game component and cyber UI overlays.
-- `src/index.css`: Theme tokens and typography styles.
+- `src/index.css`: Theme tokens, animations, and scanline styles.
 - `index.html`: Web app entry with Google Fonts and favicon.
 - `src/vite-env.d.ts`: Vite environment type declarations.
