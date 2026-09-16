@@ -1,51 +1,45 @@
-# HUHCAT Game Handoff — Full Game Overhaul: Orangie Powerup System, Bug Fixes, Level Rewrite
+# HUHCAT Game Handoff — Platform Height Reachability & Comprehensive In-Game Tutorial Guide
 
 **Date**: 2026-09-15  
 **Project**: HUHCAT Game (`g:\JMXTHEGHOST\huhcatgame`)  
 **Live Public Game URL**: https://jmthomasofficial.github.io/huhcatgame/  
 **GitHub Repository**: https://github.com/jmthomasofficial/huhcatgame  
-**Status**: 100% Deployed & Live on GitHub Pages (Commit: `f82d145`, Run: `35014627924`)
+**Status**: 100% Deployed & Live on GitHub Pages (Commit: `7e7ee57`, Run: `35018193222`)
 
 ---
 
 ## Summary of This Session
 
 ### Major Changes Made
-1. **Fixed ALL platform overlap bugs** — Segment B (staircase) rewritten with thin step platforms, Segment D bricks raised for proper clearance, post-generation overlap validator added
-2. **Fixed respawn death loop** — Tracks lastSafeX/Y, respawns on solid ground
-3. **Fixed frame-rate dependent physics** — All physics scaled by dt*60
-4. **Fixed stomp tunneling** — Previous-frame position check for reliable stomps
-5. **Fixed side collision** — Least-penetration push-out
-6. **Added Orangie penguin character** — Full canvas-drawn animated sprite (orange beanie, black hoodie, blue accents, "R" logo) as a friendly in-game NPC
-7. **5 powerup types**: Double Jump (30s), Extra Life, Invincibility (8s), 2× Score (20s), Coin Magnet (15s)
-8. **Orangie Divine Rescue cutscene** — After 9th death, Orangie descends from glowing sun to grant +1 life (one-time per run)
-9. **Coyote time + Jump buffer + Variable jump height** — Much better game feel
-10. **Hitstop on stomp** — 3-frame freeze for punch
-11. **8 level segment types** (4 new: Vertical Shaft, Speed Run Corridor, Puzzle Pit, Orangie's Shrine)
-12. **4 difficulty zones** with themed platform colors (green → purple → red → gold)
-13. **Seeded level generation** — Reproducible levels, seed displayed on game over with copy button
-14. **Powerup HUD** — Active powerup badge with countdown timer
-15. **Refined Orangie Sprite Alignment** — Authentic 3/4 perspective with big chubby white face in the front (85% of head silhouette), soft peach cheek blush, sky blue rear skull plumage, wide knit orange ribbed beanie with green pom-pom, black hoodie with green & white drawstring aglets, and dynamic facing towards oncoming Ben Cat.
-16. **One-Way Semi-Solid Cloud Platforms & Clearance Fix** — Cloud platforms are now one-way: player can jump straight UP through them from below without hitting head, and walk through sides without getting blocked. Stepped Hill (Segment B) redesigned into a clean 5-platform arch with 110px spacing and elevated heights (groundY - 75 to -155), guaranteeing 75px+ ground clearance. Post-gen validator raises any floating platform closer than 70px to the ground.
+1. **Reachable Platform Heights (Jump Envelope Calibration)**:
+   - Root-caused jump mechanics: player height = 50px, `JUMP_FORCE = -13`, `GRAVITY = 0.6` -> theoretical max jump height is ~140.8px.
+   - In Segment D, overhead brick/question blocks were at `groundY - 220 = 280y` (bottom at 315y), making them impossible to jump onto from the ground.
+   - Lowered block rows from `groundY - 220` to `groundY - 140` (bottom at 395y, leaving 105px clear headroom for 50px cat and 32px mice underneath, while easily reachable by jumping from below or jumping on top).
+   - Added a stepping stone cloud at `x = startBlockX - 60, y = groundY - 75` before the brick row so the player can effortlessly jump on top or run underneath.
+   - Verified that all floating obstacles across all segments (Shrines, Clouds, Stepped Hills, Moving Platforms, Pits) are <= 125px off their base surface.
 
-### Files Modified
-- `src/game/types.ts` — All new types (Orangie, PowerupType, expanded Player/GameState)
-- `src/game/levelGenerator.ts` — Complete rewrite
-- `src/game/engine.ts` — Complete rewrite  
-- `src/game/orangie.ts` — NEW file (canvas sprite + rescue cutscene)
-- `src/game/renderer.ts` — Zone colors, Orangie rendering, powerup HUD
-- `src/game/HuhcatGame.tsx` — Orangie rescue guard, seed display
-- `public/orangie.jpg` — Asset copied from root
+2. **Comprehensive Glassmorphic In-Game Tutorial Guide (`src/game/TutorialModal.tsx`)**:
+   - Designed and built a 4-tab interactive modal:
+     - **Controls & Basics**: Desktop Keyboard controls (A/D/Arrows/Space), Mobile Touch glassmorphic D-pad, variable jump height (Tap = hop, Hold = full leap), coyote time (6 frames), and semi-solid one-way cloud platforms.
+     - **Combat & Combos**: Stomping robo-mice for authentic "HUH!" roars, 3-frame hitstop impact freeze, combo streaks & speed multipliers (+10%, +20%, +30% MAX), brick smashing, and glowing question blocks.
+     - **Orangie & Powerups**: Lore of Orangie the Penguin, 5 powerups (+1 Extra Life, Double Jump 30s, Invincibility 8s, 2x Score 20s, Coin Magnet 15s), and the 9th Life Divine Rescue cutscene.
+     - **Zones & Seeds**: Breakdown of 4 procedural zones (Runway, Solana, Danger, Gauntlet) and deterministic level seed sharing for speedrunners.
+   - Wired into:
+     - **Title Screen**: Primary `HOW TO PLAY` button next to `START GAME`.
+     - **Header Bar**: Top-right `TUTORIAL` glass button with hover glow.
+     - **Game Over Screen**: `HOW TO PLAY & POWERUPS` action button.
+     - **Keyboard Shortcuts**: `H` key toggles tutorial; `Escape` closes modal.
 
-### Build Status
-- TypeScript: 0 errors
-- Vite build: ✓ 34 modules, 858ms
-- Dev server tested at http://localhost:3000/
+3. **Browser QA & Visual Verification**:
+   - Automated full test suite using Playwright capturing all modal tabs and live gameplay.
+   - Verified smooth rendering, accessible UI, one-way cloud navigation, and responsive touch controls.
 
-### What's NOT Done Yet (Future Tasks)
-- Achievements/badges system (localStorage)
-- Pause menu (Escape key)
-- Wall slide / wall jump
-- Environmental audio cues
-- Global leaderboard (needs backend)
-- Hard Mode unlock after first win
+### Files Modified & Added
+- `src/game/levelGenerator.ts` — Lowered Segment D block rows to `groundY - 140`, added stepping cloud.
+- `src/game/TutorialModal.tsx` — NEW comprehensive 4-tab glassmorphic guide component.
+- `src/game/HuhcatGame.tsx` — State hook `showTutorial`, keyboard shortcut listeners (`H`/`ESC`), Title CTA, Header button, Game Over CTA, and modal mounting.
+
+### Build & Deployment Status
+- TypeScript: 0 errors (`npm run typecheck`)
+- Vite build: ✓ 35 modules, 236.17 kB bundle
+- GitHub Actions: Run `35018193222` succeeded, deployed to GitHub Pages.

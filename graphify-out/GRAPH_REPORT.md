@@ -1,16 +1,16 @@
 # Graph Report - huhcatgame  (2026-09-15)
 
 ## Corpus Check
-- 17 files · ~144,888 words
+- 18 files · ~143,053 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 180 nodes · 301 edges · 12 communities (10 shown, 2 thin omitted)
+- 182 nodes · 303 edges · 12 communities (10 shown, 2 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `3b6ae0da`
+- Built from commit: `7e7ee571`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -45,10 +45,10 @@
   src/game/HuhcatGame.tsx → src/game/renderer.ts
 - `updatePlayer()` --calls--> `playHuhSound()`  [EXTRACTED]
   src/game/engine.ts → src/game/audio.ts
-- `updatePlayer()` --calls--> `playStompSound()`  [EXTRACTED]
-  src/game/engine.ts → src/game/audio.ts
-- `applyPowerup()` --calls--> `playCoinSound()`  [EXTRACTED]
-  src/game/engine.ts → src/game/audio.ts
+- `createInitialState()` --calls--> `generateLevel()`  [EXTRACTED]
+  src/game/engine.ts → src/game/levelGenerator.ts
+- `HuhcatGame()` --calls--> `getBgmVolume()`  [EXTRACTED]
+  src/game/HuhcatGame.tsx → src/game/audio.ts
 
 ## Import Cycles
 - None detected.
@@ -68,12 +68,12 @@ Cohesion: 0.07
 Nodes (26): devDependencies, tailwindcss, @tailwindcss/vite, @types/canvas-confetti, @types/react, @types/react-dom, @types/uuid, typescript (+18 more)
 
 ### Community 3 - "engine.ts"
-Cohesion: 0.17
-Nodes (24): applyPowerup(), checkPlayerCoinCollision(), checkPlayerMouseCollision(), checkPlayerOrangieCollision(), checkPlayerPlatformCollision(), getPowerupText(), playerDie(), spawnBrickBreakParticles() (+16 more)
+Cohesion: 0.14
+Nodes (31): getAudioContext(), playBrickBreakSound(), playCoinSound(), playComboSound(), playDeathSound(), playJumpSound(), playStompSound(), applyPowerup() (+23 more)
 
 ### Community 4 - "audio.ts"
-Cohesion: 0.18
-Nodes (21): bgmVolume, getAudioContext(), getBgmAudio(), getBgmVolume(), initAudio(), isBgmMuted(), loadSoundBuffer(), playBrickBreakSound() (+13 more)
+Cohesion: 0.19
+Nodes (15): bgmVolume, getBgmAudio(), getBgmVolume(), initAudio(), isBgmMuted(), loadSoundBuffer(), playHuhSound(), playPowerUpSound() (+7 more)
 
 ### Community 5 - "compilerOptions"
 Cohesion: 0.11
@@ -84,8 +84,8 @@ Cohesion: 0.33
 Nodes (8): fetchHuhcatProof(), HuhcatProof, loadBundledSnapshot(), metadataFromAccount(), rpcCall(), RpcOk, RPCS, uriFromTransaction()
 
 ### Community 7 - "Summary of This Session"
-Cohesion: 0.29
-Nodes (6): Build Status, Files Modified, HUHCAT Game Handoff — Full Game Overhaul: Orangie Powerup System, Bug Fixes, Level Rewrite, Major Changes Made, Summary of This Session, What's NOT Done Yet (Future Tasks)
+Cohesion: 0.33
+Nodes (5): Build & Deployment Status, Files Modified & Added, HUHCAT Game Handoff — Platform Height Reachability & Comprehensive In-Game Tutorial Guide, Major Changes Made, Summary of This Session
 
 ## Knowledge Gaps
 - **56 isolated node(s):** `name`, `private`, `type`, `dev`, `build` (+51 more)
@@ -96,7 +96,7 @@ Nodes (6): Build Status, Files Modified, HUHCAT Game Handoff — Full Game Overh
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `dependencies` connect `dependencies` to `devDependencies`?**
-  _High betweenness centrality (0.064) - this node is a cross-community bridge._
+  _High betweenness centrality (0.062) - this node is a cross-community bridge._
 - **Why does `render()` connect `renderer.ts` to `audio.ts`?**
   _High betweenness centrality (0.017) - this node is a cross-community bridge._
 - **What connects `name`, `private`, `type` to the rest of the system?**
@@ -107,5 +107,5 @@ _Questions this graph is uniquely positioned to answer:_
   _Cohesion score 0.07407407407407407 - nodes in this community are weakly interconnected._
 - **Should `devDependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.07407407407407407 - nodes in this community are weakly interconnected._
-- **Should `compilerOptions` be split into smaller, more focused modules?**
-  _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
+- **Should `engine.ts` be split into smaller, more focused modules?**
+  _Cohesion score 0.13911290322580644 - nodes in this community are weakly interconnected._

@@ -15,8 +15,8 @@
     "semantic_hash": ""
   },
   "src/game/HuhcatGame.tsx": {
-    "mtime": 1789499493.113697,
-    "ast_hash": "47b7d0c14465b4320f6a3057230a7458",
+    "mtime": 1789502811.0770774,
+    "ast_hash": "b3fe082c59190802d2706d741ab1e610",
     "semantic_hash": ""
   },
   "src/game/audio.ts": {
@@ -35,8 +35,8 @@
     "semantic_hash": ""
   },
   "src/game/levelGenerator.ts": {
-    "mtime": 1789502102.9456327,
-    "ast_hash": "d14e4f7d658528f84a37cffee716cb8e",
+    "mtime": 1789502600.8914337,
+    "ast_hash": "f4431380af17b15d5cd0b0e23abeb06b",
     "semantic_hash": ""
   },
   "src/game/orangie.ts": {
@@ -85,8 +85,8 @@
     "semantic_hash": ""
   },
   "handoff.md": {
-    "mtime": 1789501883.857563,
-    "ast_hash": "76fcb6729b88296395fa84a3590a4ebd",
+    "mtime": 1789503213.364077,
+    "ast_hash": "e5eb42212ed66e61f507c736ac9b6bb6",
     "semantic_hash": ""
   },
   "index.html": {
@@ -149,11 +149,6 @@
     "ast_hash": "11f15c799e79c153440465e1d97c6611",
     "semantic_hash": ""
   },
-  "screenshot-titlescreen.jpg": {
-    "mtime": 1789493707.5328739,
-    "ast_hash": "cb9cb5d7b2bb395b0a0aeae5830bbe09",
-    "semantic_hash": ""
-  },
   "public/bgm.mp3": {
     "mtime": 1789133961.2191017,
     "ast_hash": "493f8a180871c005e46503e51c2a893f",
@@ -172,6 +167,11 @@
   "public/huh2.mp3": {
     "mtime": 1789485917.5681982,
     "ast_hash": "e2a0cb29ed845651b7fc8e2d43d785a5",
+    "semantic_hash": ""
+  },
+  "src/game/TutorialModal.tsx": {
+    "mtime": 1789502625.7409203,
+    "ast_hash": "4670a34b0b3d67561547eda28698f986",
     "semantic_hash": ""
   }
 }
