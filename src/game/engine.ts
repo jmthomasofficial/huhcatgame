@@ -1,6 +1,6 @@
 import { GameState, Keys, Player, Particle, HuhText, Orangie, PowerupType } from './types';
 import { generateLevel } from './levelGenerator';
-import { playHuhSound, playStompSound, playCoinSound, playJumpSound, playDeathSound, playComboSound, playBrickBreakSound } from './audio';
+import { playHuhSound, playStompSound, playCoinSound, playJumpSound, playDeathSound, playComboSound, playBrickBreakSound, playVictorySound } from './audio';
 
 const GRAVITY = 0.6;
 const JUMP_FORCE = -13;
@@ -56,6 +56,7 @@ export function createInitialState(): GameState {
     levelLength,
     gameOver: false,
     gameWon: false,
+    victoryTimer: 0,
     paused: false,
     screenShake: 0,
     time: 0,
@@ -74,7 +75,25 @@ export function createInitialState(): GameState {
 }
 
 export function update(state: GameState, keys: Keys, dt: number, viewWidth: number = 940, viewHeight: number = 500): GameState {
-  if (state.gameOver || state.gameWon || state.paused) return state;
+  if (state.gameOver || state.paused) return state;
+  
+  if (state.gameWon) {
+    if (state.victoryTimer !== undefined && state.victoryTimer > 0) {
+      state.victoryTimer -= dt;
+      // Continue animating celebratory particles, texts, and screen shake
+      updateParticles(state, dt);
+      updateHuhTexts(state, dt);
+      if (state.screenShake > 0) {
+        state.screenShake -= dt * 5;
+        if (state.screenShake < 0) state.screenShake = 0;
+      }
+      // Victory gentle descent/settling
+      if (state.player.y < 450) {
+        state.player.y += 2 * dt * 60;
+      }
+    }
+    return state;
+  }
   
   if (state.hitstopFrames > 0) {
     state.hitstopFrames--;
@@ -133,14 +152,54 @@ export function update(state: GameState, keys: Keys, dt: number, viewWidth: numb
   // Update distance
   state.distance = Math.max(state.distance, state.player.x / 50);
   
-  // Check win condition
-  if (state.player.x > state.levelLength - 100) {
+  // Check win condition (Crossing into the Solana V1 Inscription Victory Portal)
+  if (!state.gameWon && state.player.x + state.player.width >= state.levelLength - 20) {
     state.gameWon = true;
-    state.player.score += 1000 * state.scoreMultiplier;
+    state.victoryTimer = 0.9; // 0.9s celebratory spectacle before victory modal
+    const victoryBonus = 5000 * state.scoreMultiplier;
+    state.player.score += victoryBonus;
     if (state.player.score > state.highScore) {
       state.highScore = state.player.score;
       try { localStorage.setItem('huhcat_highscore', state.highScore.toString()); } catch(e) {}
     }
+
+    // Celebratory victory leap & screen shake
+    state.player.vx = 0;
+    state.player.vy = -7;
+    state.screenShake = 3;
+
+    // Spawn massive burst of celebratory victory particles from the portal core
+    for (let i = 0; i < 45; i++) {
+      const angle = (Math.PI * 2 * i) / 45 + (Math.random() - 0.5) * 0.4;
+      const speed = 2.5 + Math.random() * 6;
+      state.particles.push({
+        x: state.levelLength,
+        y: 410,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 2.5,
+        life: 0,
+        maxLife: 1.0 + Math.random() * 0.8,
+        color: ['#39ff88', '#ffd700', '#9945ff', '#00f0ff', '#ffffff'][i % 5],
+        size: 3.5 + Math.random() * 4,
+        type: 'star'
+      });
+    }
+
+    // Floating celebratory banner text
+    state.huhTexts.push({
+      x: state.levelLength,
+      y: 340,
+      vy: -1.8,
+      life: 0,
+      maxLife: 2.2,
+      scale: 1.5,
+      text: '🏆 V1 INSCRIBED! +5000 🏆',
+      color: '#ffd700'
+    });
+
+    // Play victory fanfare & Ben Cat joy vocal
+    playVictorySound();
+    playHuhSound(1.2);
   }
   
   return state;

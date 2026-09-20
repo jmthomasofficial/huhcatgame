@@ -15,13 +15,13 @@
     "semantic_hash": ""
   },
   "src/game/HuhcatGame.tsx": {
-    "mtime": 1789871031.596546,
-    "ast_hash": "99546528ce76956e4d8d21303fb9db40",
+    "mtime": 1789502811.0770774,
+    "ast_hash": "b3fe082c59190802d2706d741ab1e610",
     "semantic_hash": ""
   },
   "src/game/audio.ts": {
-    "mtime": 1789870728.188426,
-    "ast_hash": "6e9cf388e36fcaac988a743c3eb55d43",
+    "mtime": 1789489866.797154,
+    "ast_hash": "05b98fae01400d54529bcbb9cc0756b7",
     "semantic_hash": ""
   },
   "src/game/chain.ts": {
@@ -30,13 +30,13 @@
     "semantic_hash": ""
   },
   "src/game/engine.ts": {
-    "mtime": 1789870764.6768692,
-    "ast_hash": "4deff4245eb61d3ec0459b80b9d14970",
+    "mtime": 1789502044.7838235,
+    "ast_hash": "4686ce86d1d24fa35c92337caabae3db",
     "semantic_hash": ""
   },
   "src/game/levelGenerator.ts": {
-    "mtime": 1789870733.6895683,
-    "ast_hash": "ee38b7a11f4691651b0f1417a1e129b8",
+    "mtime": 1789502600.8914337,
+    "ast_hash": "f4431380af17b15d5cd0b0e23abeb06b",
     "semantic_hash": ""
   },
   "src/game/orangie.ts": {
@@ -45,13 +45,13 @@
     "semantic_hash": ""
   },
   "src/game/renderer.ts": {
-    "mtime": 1789870783.0078523,
-    "ast_hash": "1c33208b5dc47e66d588a84eaab2d2c5",
+    "mtime": 1789501549.277252,
+    "ast_hash": "dfe0aeb4d830feda69c0dc3a7d99c853",
     "semantic_hash": ""
   },
   "src/game/types.ts": {
-    "mtime": 1789870723.786831,
-    "ast_hash": "636ecb39b4c1d12b376ad3508456c752",
+    "mtime": 1789499093.1307833,
+    "ast_hash": "9cd5dbc9f70827bee0df1ff23264a9e3",
     "semantic_hash": ""
   },
   "src/main.tsx": {
@@ -85,8 +85,8 @@
     "semantic_hash": ""
   },
   "handoff.md": {
-    "mtime": 1789557215.276413,
-    "ast_hash": "65cc4ce55126c68d2fbe7429f5e97a11",
+    "mtime": 1789503213.364077,
+    "ast_hash": "e5eb42212ed66e61f507c736ac9b6bb6",
     "semantic_hash": ""
   },
   "index.html": {
@@ -172,101 +172,6 @@
   "src/game/TutorialModal.tsx": {
     "mtime": 1789502625.7409203,
     "ast_hash": "4670a34b0b3d67561547eda28698f986",
-    "semantic_hash": ""
-  },
-  "public/social/huhcat_battlefield_banner_branded_1500x500.png": {
-    "mtime": 1789556553.6730793,
-    "ast_hash": "ee1c8759d80a107560014e42c224598e",
-    "semantic_hash": ""
-  },
-  "public/social/huhcat_battlefield_banner_clean_1500x500.png": {
-    "mtime": 1789556553.4528494,
-    "ast_hash": "db8782ead50f050a61dfb6ef5bd3ba80",
-    "semantic_hash": ""
-  },
-  "public/social/huhcat_general_full_1000x1000.png": {
-    "mtime": 1789556249.8371406,
-    "ast_hash": "94db09440cd69739e33ca0fb91b1547e",
-    "semantic_hash": ""
-  },
-  "public/social/huhcat_general_full_400x400.png": {
-    "mtime": 1789556249.856099,
-    "ast_hash": "f91cfc3dadb4ebb8f103747944a077d7",
-    "semantic_hash": ""
-  },
-  "public/social/huhcat_general_hero_1000x1000.png": {
-    "mtime": 1789556250.270742,
-    "ast_hash": "0758249cd36016f190ef8b918b5af663",
-    "semantic_hash": ""
-  },
-  "public/social/huhcat_general_hero_400x400.png": {
-    "mtime": 1789556250.2999027,
-    "ast_hash": "0de9160323f0c9e68cbd896e4b5d6175",
-    "semantic_hash": ""
-  },
-  "public/social/huhcat_pfp_duo_1000x1000.png": {
-    "mtime": 1789555976.8234892,
-    "ast_hash": "5371781c3b9750b970915217cb771831",
-    "semantic_hash": ""
-  },
-  "public/social/huhcat_pfp_duo_400x400.png": {
-    "mtime": 1789555976.8444922,
-    "ast_hash": "2e593786ef960ae273262849bc00ce44",
-    "semantic_hash": ""
-  },
-  "public/social/huhcat_pfp_solo_1000x1000.png": {
-    "mtime": 1789555976.4482706,
-    "ast_hash": "550d5f217612e524783d4bb3fd769882",
-    "semantic_hash": ""
-  },
-  "public/social/huhcat_pfp_solo_400x400.png": {
-    "mtime": 1789555976.4688284,
-    "ast_hash": "e304f4855f6890736fcf206158a63319",
-    "semantic_hash": ""
-  },
-  "public/social/huhcat_pfp_throne_1000x1000.png": {
-    "mtime": 1789555977.1895514,
-    "ast_hash": "521cba822abb8ab3616d7d9d10f3becd",
-    "semantic_hash": ""
-  },
-  "public/social/huhcat_pfp_throne_400x400.png": {
-    "mtime": 1789555977.2122548,
-    "ast_hash": "8d9c58d1eb958380b898125e664237bf",
-    "semantic_hash": ""
-  },
-  "public/social/huhcat_x_banner_branded_1500x500.png": {
-    "mtime": 1789556148.1658397,
-    "ast_hash": "d79372039c147eee11a0b9faa5dc890f",
-    "semantic_hash": ""
-  },
-  "public/social/huhcat_x_banner_clean_1500x500.png": {
-    "mtime": 1789556147.956954,
-    "ast_hash": "43f0b69e0b8fde0fc2e4926da0e53a7e",
-    "semantic_hash": ""
-  },
-  "public/social/huhcat_x_mockup_battlefield.png": {
-    "mtime": 1789556554.0250869,
-    "ast_hash": "ab5e4b668d10a4c60c90fad7f9d3dd68",
-    "semantic_hash": ""
-  },
-  "public/social/huhcat_x_mockup_duo.png": {
-    "mtime": 1789556148.7317452,
-    "ast_hash": "1da7ae7cabbd2e42228587cc586fb76c",
-    "semantic_hash": ""
-  },
-  "public/social/huhcat_x_mockup_general_full.png": {
-    "mtime": 1789556250.811761,
-    "ast_hash": "af1298329ee0880a58058e3a2c7d65a3",
-    "semantic_hash": ""
-  },
-  "public/social/huhcat_x_mockup_general_hero.png": {
-    "mtime": 1789556251.0257063,
-    "ast_hash": "f8dacc6e5fe41570a2266902c2cafd8f",
-    "semantic_hash": ""
-  },
-  "public/social/huhcat_x_mockup_solo.png": {
-    "mtime": 1789556148.489536,
-    "ast_hash": "9c17a5da2fa4997dec60e1b36e7fca2f",
     "semantic_hash": ""
   }
 }

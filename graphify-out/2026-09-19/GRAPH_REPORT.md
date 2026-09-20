@@ -1,11 +1,11 @@
-# Graph Report - huhcatgame  (2026-09-19)
+# Graph Report - huhcatgame  (2026-09-16)
 
 ## Corpus Check
-- 18 files · ~945,261 words
+- 18 files · ~943,119 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 182 nodes · 308 edges · 13 communities (10 shown, 3 thin omitted)
+- 180 nodes · 301 edges · 13 communities (10 shown, 3 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
@@ -29,13 +29,13 @@
 
 ## God Nodes (most connected - your core abstractions)
 1. `updatePlayer()` - 17 edges
-2. `update()` - 15 edges
-3. `render()` - 15 edges
-4. `getAudioContext()` - 12 edges
-5. `compilerOptions` - 12 edges
-6. `HuhcatGame()` - 11 edges
-7. `playHuhSound()` - 7 edges
-8. `updateOrangies()` - 7 edges
+2. `render()` - 14 edges
+3. `update()` - 13 edges
+4. `compilerOptions` - 12 edges
+5. `HuhcatGame()` - 11 edges
+6. `getAudioContext()` - 11 edges
+7. `updateOrangies()` - 7 edges
+8. `playHuhSound()` - 6 edges
 9. `initAudio()` - 5 edges
 10. `playCoinSound()` - 5 edges
 
@@ -44,11 +44,11 @@
   src/game/HuhcatGame.tsx → src/game/engine.ts
 - `HuhcatGame()` --calls--> `render()`  [EXTRACTED]
   src/game/HuhcatGame.tsx → src/game/renderer.ts
-- `update()` --calls--> `playHuhSound()`  [EXTRACTED]
-  src/game/engine.ts → src/game/audio.ts
 - `updatePlayer()` --calls--> `playHuhSound()`  [EXTRACTED]
   src/game/engine.ts → src/game/audio.ts
 - `updatePlayer()` --calls--> `playStompSound()`  [EXTRACTED]
+  src/game/engine.ts → src/game/audio.ts
+- `applyPowerup()` --calls--> `playCoinSound()`  [EXTRACTED]
   src/game/engine.ts → src/game/audio.ts
 
 ## Import Cycles
@@ -73,8 +73,8 @@ Cohesion: 0.17
 Nodes (24): applyPowerup(), checkPlayerCoinCollision(), checkPlayerMouseCollision(), checkPlayerOrangieCollision(), checkPlayerPlatformCollision(), getPowerupText(), playerDie(), spawnBrickBreakParticles() (+16 more)
 
 ### Community 4 - "audio.ts"
-Cohesion: 0.17
-Nodes (23): bgmVolume, getAudioContext(), getBgmAudio(), getBgmVolume(), initAudio(), isBgmMuted(), loadSoundBuffer(), playBrickBreakSound() (+15 more)
+Cohesion: 0.18
+Nodes (21): bgmVolume, getAudioContext(), getBgmAudio(), getBgmVolume(), initAudio(), isBgmMuted(), loadSoundBuffer(), playBrickBreakSound() (+13 more)
 
 ### Community 5 - "compilerOptions"
 Cohesion: 0.11
@@ -97,13 +97,13 @@ Nodes (3): 1. Verified Twitter / X Branding Suite Created (`public/social/`), HU
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `dependencies` connect `dependencies` to `devDependencies`?**
-  _High betweenness centrality (0.062) - this node is a cross-community bridge._
+  _High betweenness centrality (0.064) - this node is a cross-community bridge._
 - **Why does `render()` connect `renderer.ts` to `audio.ts`?**
-  _High betweenness centrality (0.019) - this node is a cross-community bridge._
+  _High betweenness centrality (0.018) - this node is a cross-community bridge._
 - **What connects `name`, `private`, `type` to the rest of the system?**
   _54 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `renderer.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.1126984126984127 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
 - **Should `dependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.07407407407407407 - nodes in this community are weakly interconnected._
 - **Should `devDependencies` be split into smaller, more focused modules?**

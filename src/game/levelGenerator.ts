@@ -292,11 +292,37 @@ export function generateLevel(seed: number): { platforms: Platform[]; mice: Mous
     }
   }
 
-  // Final Victory Runway
-  platforms.push({ x, y: groundY, width: 400, height: 100, type: 'ground', zone: 4 });
-  for (let i = 0; i < 5; i++) {
-    coins.push({ x: x + 100 + i * 40, y: groundY - 100 - Math.sin(i * Math.PI / 4) * 40, width: 24, height: 24, collected: false, frame: 0, frameTimer: 0, type: 'golden' });
+  // Final Victory Runway & Solana V1 Inscription Portal Tarmac
+  // Guarantee a continuous, solid, unbreakable ground platform from current x all the way past the portal to levelLength + 800px!
+  const victoryRunwayWidth = Math.max(900, (levelLength + 800) - x);
+  platforms.push({ x, y: groundY, width: victoryRunwayWidth, height: 100, type: 'ground', zone: 4 });
+
+  // Protective End Barrier Wall (Terminal Security Gate) at levelLength + 760
+  // Ben Cat can never walk into the void or drop off
+  platforms.push({ x: levelLength + 760, y: groundY - 260, width: 60, height: 260, type: 'brick', zone: 4 });
+
+  // Triumphant Golden Coin Arc leading up to the Solana V1 Inscription Portal
+  const coinStartX = levelLength - 380;
+  for (let i = 0; i < 9; i++) {
+    const cx = coinStartX + i * 42;
+    const cy = groundY - 60 - Math.sin((i / 8) * Math.PI) * 75;
+    coins.push({ x: cx, y: cy, width: 24, height: 24, collected: false, frame: 0, frameTimer: 0, type: 'golden' });
   }
+
+  // Triumphant Victory Orangie waiting triumphantly past the portal
+  orangies.push({
+    x: levelLength + 90,
+    y: groundY - 44,
+    width: 36,
+    height: 44,
+    collected: false,
+    powerup: 'extraLife',
+    bobTimer: 0,
+    waveTimer: 0,
+    happyTimer: 0,
+    flyAwayVy: 0,
+    flyingAway: false
+  });
 
   // Random Orangies on regular ground platforms
   const extraOrangies = 1 + Math.floor(rng() * 2);

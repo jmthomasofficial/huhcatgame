@@ -48,6 +48,9 @@ export function render(ctx: CanvasRenderingContext2D, state: GameState, canvasWi
     }
   });
   
+  // 2.5 Draw Solana V1 Inscription Victory Portal & Finish Line
+  drawVictoryPortal(ctx, state.levelLength, 500, camera, state.time, state.gameWon, canvasWidth);
+  
   // 3. Draw Collectibles (Solana Gold Coins & Holographic Fish)
   state.coins.forEach(c => {
     if (!c.collected && c.x + c.width > camera.x - 50 && c.x < camera.x + canvasWidth + 50) {
@@ -1075,4 +1078,300 @@ function getPowerupHudText(powerup: string): string {
     case 'magnet': return 'MAGNET';
     default: return '';
   }
+}
+
+export function drawVictoryPortal(
+  ctx: CanvasRenderingContext2D,
+  portalX: number,
+  groundY: number,
+  camera: { x: number; y: number },
+  time: number,
+  gameWon: boolean,
+  canvasWidth: number
+) {
+  // Culling
+  if (portalX < camera.x - 550 || portalX > camera.x + canvasWidth + 550) return;
+
+  const px = portalX - camera.x;
+  const py = groundY - camera.y;
+
+  ctx.save();
+
+  // 1. Advance Runway Markings (Approaching arrows on ground)
+  const chevronOffsets = [-420, -340, -260, -180, -100];
+  chevronOffsets.forEach((offset, idx) => {
+    const cx = px + offset;
+    if (cx > -50 && cx < canvasWidth + 50) {
+      const pulse = Math.sin(time * 8 - idx * 0.8) > 0;
+      ctx.fillStyle = pulse ? 'rgba(57, 255, 136, 0.8)' : 'rgba(255, 215, 0, 0.4)';
+      ctx.font = 'bold 16px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('▶▶▶', cx, py - 4);
+    }
+  });
+
+  // 1.5 Advance Warning Cyber Signpost at px - 350
+  const signX = px - 350;
+  if (signX > -150 && signX < canvasWidth + 150) {
+    ctx.save();
+    // Slim mounting posts
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(signX - 45, py);
+    ctx.lineTo(signX - 45, py - 110);
+    ctx.moveTo(signX + 45, py);
+    ctx.lineTo(signX + 45, py - 110);
+    ctx.stroke();
+
+    // Banner card
+    ctx.fillStyle = 'rgba(13, 17, 28, 0.9)';
+    ctx.fillRect(signX - 60, py - 145, 120, 36);
+    ctx.strokeStyle = 'rgba(255, 215, 0, 0.7)';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(signX - 60, py - 145, 120, 36);
+
+    ctx.font = 'bold 9px "Space Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ffd700';
+    ctx.fillText('▲ ZONE 4 CLEAR ▲', signX, py - 132);
+    ctx.fillStyle = '#39ff88';
+    ctx.font = 'bold 8px "Space Mono", monospace';
+    ctx.fillText('SOLANA V1 PORTAL ⏩', signX, py - 118);
+    ctx.restore();
+  }
+
+  // 2. Checkered Finish Line Tarmac
+  const finishW = 90;
+  const finishStartX = px - finishW / 2;
+  const tileSize = 9;
+  for (let r = 0; r < 2; r++) {
+    for (let c = 0; c < 10; c++) {
+      const isAlt = (r + c) % 2 === 0;
+      ctx.fillStyle = isAlt ? '#04050a' : (gameWon ? '#ffd700' : '#39ff88');
+      ctx.fillRect(finishStartX + c * tileSize, py + r * 6, tileSize, 6);
+    }
+  }
+  // Checkered finish line border
+  ctx.strokeStyle = 'rgba(57, 255, 136, 0.8)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(finishStartX, py, finishW, 12);
+
+  // 3. Upward Sky Beacons from Pylon Tops
+  const beaconLeftX = px - 52;
+  const beaconRightX = px + 52;
+  const pylonTopY = py - 180;
+
+  [beaconLeftX, beaconRightX].forEach(bx => {
+    ctx.save();
+    const beamGrad = ctx.createLinearGradient(bx, pylonTopY, bx, pylonTopY - 260);
+    beamGrad.addColorStop(0, gameWon ? 'rgba(255, 215, 0, 0.6)' : 'rgba(57, 255, 136, 0.45)');
+    beamGrad.addColorStop(0.5, 'rgba(153, 69, 255, 0.25)');
+    beamGrad.addColorStop(1, 'rgba(0, 240, 255, 0)');
+    ctx.fillStyle = beamGrad;
+    ctx.fillRect(bx - 12, pylonTopY - 260, 24, 260);
+    ctx.restore();
+  });
+
+  // 4. Portal Vortex Core (Centered at px, py - 90)
+  const coreY = py - 90;
+  ctx.save();
+  ctx.translate(px, coreY);
+
+  // Radiant outer aura
+  const auraRad = (gameWon ? 75 : 60) + Math.sin(time * 5) * 5;
+  const auraGrad = ctx.createRadialGradient(0, 0, 10, 0, 0, auraRad);
+  auraGrad.addColorStop(0, gameWon ? 'rgba(255, 215, 0, 0.4)' : 'rgba(0, 240, 255, 0.35)');
+  auraGrad.addColorStop(0.4, 'rgba(153, 69, 255, 0.25)');
+  auraGrad.addColorStop(0.8, 'rgba(57, 255, 136, 0.15)');
+  auraGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  ctx.fillStyle = auraGrad;
+  ctx.beginPath();
+  ctx.arc(0, 0, auraRad, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Dark dimensional gate background
+  ctx.fillStyle = '#040714';
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 38, 68, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Swirling Ring 1: Solana Purple (#9945ff)
+  ctx.save();
+  ctx.rotate(time * 2.2);
+  ctx.strokeStyle = '#9945ff';
+  ctx.lineWidth = 3;
+  ctx.setLineDash([12, 8]);
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 36, 64, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+
+  // Swirling Ring 2: Emerald Green (#39ff88)
+  ctx.save();
+  ctx.rotate(-time * 2.8);
+  ctx.strokeStyle = '#39ff88';
+  ctx.lineWidth = 2.5;
+  ctx.setLineDash([8, 6]);
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 28, 52, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+
+  // Swirling Ring 3: Electric Cyan Core (#00f0ff)
+  ctx.save();
+  ctx.rotate(time * 3.5);
+  ctx.strokeStyle = '#00f0ff';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 18, 36, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+
+  // Radiant core singularity
+  ctx.shadowColor = gameWon ? '#ffd700' : '#00f0ff';
+  ctx.shadowBlur = gameWon ? 25 : 15;
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 8 + Math.sin(time * 6) * 2, 16 + Math.sin(time * 6) * 4, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // Sweeping vertical laser scanline
+  const scanY = Math.sin(time * 4) * 45;
+  ctx.strokeStyle = 'rgba(57, 255, 136, 0.7)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(-24, scanY);
+  ctx.lineTo(24, scanY);
+  ctx.stroke();
+
+  ctx.restore(); // end vortex translate
+
+  // 5. Twin Solana Pylons / Obelisks
+  const pylonW = 24;
+  const pylonH = 180;
+  const pylonLeftX = px - 64;
+  const pylonRightX = px + 40;
+
+  [pylonLeftX, pylonRightX].forEach((xPos, idx) => {
+    // Pylon structure body
+    ctx.fillStyle = '#0d111c';
+    ctx.fillRect(xPos, py - pylonH, pylonW, pylonH);
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(xPos, py - pylonH, pylonW, pylonH);
+
+    // Glowing vertical neon conduit
+    const conduitColor = idx === 0 ? '#9945ff' : '#39ff88';
+    ctx.fillStyle = conduitColor;
+    ctx.shadowColor = conduitColor;
+    ctx.shadowBlur = 8;
+    ctx.fillRect(xPos + 10, py - pylonH + 15, 4, pylonH - 25);
+    ctx.shadowBlur = 0;
+
+    // Segmented power cell nodes
+    for (let s = 0; s < 4; s++) {
+      const segY = py - 40 - s * 35;
+      const isLit = Math.sin(time * 5 + s) > -0.2;
+      ctx.fillStyle = isLit ? (s % 2 === 0 ? '#ffd700' : '#00f0ff') : '#1e293b';
+      ctx.fillRect(xPos + 4, segY, pylonW - 8, 5);
+    }
+
+    // Pylon Crown Cap with Glowing Crystal
+    ctx.fillStyle = '#1e293b';
+    ctx.beginPath();
+    ctx.moveTo(xPos - 2, py - pylonH);
+    ctx.lineTo(xPos + pylonW / 2, py - pylonH - 12);
+    ctx.lineTo(xPos + pylonW + 2, py - pylonH);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#ffd700';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Floating crystal
+    ctx.fillStyle = gameWon ? '#ffd700' : '#39ff88';
+    ctx.shadowColor = ctx.fillStyle;
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.arc(xPos + pylonW / 2, py - pylonH - 8, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  });
+
+  // 6. Arch Top Crossbar & Header
+  const archX = px - 70;
+  const archW = 140;
+  const archY = py - pylonH - 8;
+  const archH = 26;
+
+  ctx.fillStyle = '#0f172a';
+  ctx.fillRect(archX, archY, archW, archH);
+  ctx.strokeStyle = '#39ff88';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(archX, archY, archW, archH);
+
+  // Solana Logo / Medallion in center of arch
+  ctx.save();
+  ctx.shadowColor = '#ffd700';
+  ctx.shadowBlur = 10;
+  ctx.fillStyle = '#ffd700';
+  ctx.beginPath();
+  ctx.arc(px, archY + archH / 2, 9, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = '#0d111c';
+  ctx.font = 'bold 9px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('S', px, archY + archH / 2 + 3);
+  ctx.restore();
+
+  // 7. Floating Holographic Signboard Above Arch
+  ctx.save();
+  const boardY = archY - 32 + Math.sin(time * 3) * 2;
+  const boardW = 170;
+  const boardH = 28;
+  const boardX = px - boardW / 2;
+
+  ctx.fillStyle = 'rgba(4, 5, 10, 0.9)';
+  ctx.fillRect(boardX, boardY, boardW, boardH);
+  ctx.strokeStyle = gameWon ? 'rgba(255, 215, 0, 0.9)' : 'rgba(57, 255, 136, 0.8)';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(boardX, boardY, boardW, boardH);
+
+  ctx.shadowColor = gameWon ? '#ffd700' : '#39ff88';
+  ctx.shadowBlur = 10;
+  ctx.font = 'bold 10px "Space Mono", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = gameWon ? '#ffd700' : '#39ff88';
+  ctx.fillText('SOLANA V1 INSCRIPTION', px, boardY + 13);
+  ctx.font = 'bold 8px "Space Mono", monospace';
+  ctx.fillStyle = '#00f0ff';
+  ctx.fillText(gameWon ? '★ ON-CHAIN VICTORY! ★' : '★ PORTAL DESTINATION ★', px, boardY + 23);
+  ctx.shadowBlur = 0;
+  ctx.restore();
+
+  // 8. If Game Won: Radiant Sunburst Celebration Beams
+  if (gameWon) {
+    ctx.save();
+    ctx.translate(px, coreY);
+    for (let b = 0; b < 12; b++) {
+      const rayAngle = (b * Math.PI / 6) + time * 1.5;
+      ctx.save();
+      ctx.rotate(rayAngle);
+      ctx.fillStyle = b % 2 === 0 ? 'rgba(255, 215, 0, 0.18)' : 'rgba(57, 255, 136, 0.18)';
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(200, -25);
+      ctx.lineTo(200, 25);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+    ctx.restore();
+  }
+
+  ctx.restore();
 }

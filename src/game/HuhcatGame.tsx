@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import confetti from 'canvas-confetti';
 import { GameState, Keys } from './types';
 import { createInitialState, update } from './engine';
 import { render } from './renderer';
@@ -38,6 +39,21 @@ export default function HuhcatGame() {
   // Preload authentic Ben Cat audio buffers on mount
   useEffect(() => {
     initAudio();
+    if (typeof window !== 'undefined') {
+      (window as any).__HUHCAT_GAME__ = {
+        getState: () => gameStateRef.current,
+        setState: (s: any) => { gameStateRef.current = s; },
+        teleportToEnd: () => {
+          if (gameStateRef.current) {
+            gameStateRef.current.player.x = gameStateRef.current.levelLength - 280;
+            gameStateRef.current.player.y = 440;
+            gameStateRef.current.player.vx = 0;
+            gameStateRef.current.player.vy = 0;
+            gameStateRef.current.camera.x = gameStateRef.current.levelLength - 500;
+          }
+        }
+      };
+    }
   }, []);
 
   const handleTestHuh = async (e: React.MouseEvent) => {
@@ -256,7 +272,7 @@ export default function HuhcatGame() {
         setGameScreen('gameover');
         return;
       }
-      if (state.gameWon) {
+      if (state.gameWon && (!state.victoryTimer || state.victoryTimer <= 0)) {
         setScore(state.player.score);
         setHighScore(state.highScore);
         setGameScreen('win');
@@ -298,6 +314,37 @@ export default function HuhcatGame() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Celebrate on win with confetti
+  useEffect(() => {
+    if (gameScreen === 'win') {
+      try {
+        confetti({
+          particleCount: 100,
+          spread: 80,
+          origin: { y: 0.6 },
+          colors: ['#39ff88', '#9945ff', '#ffd700', '#00f0ff', '#ffffff']
+        });
+        const timer1 = setTimeout(() => {
+          confetti({
+            particleCount: 60,
+            angle: 60,
+            spread: 60,
+            origin: { x: 0.1, y: 0.7 },
+            colors: ['#39ff88', '#ffd700', '#9945ff']
+          });
+          confetti({
+            particleCount: 60,
+            angle: 120,
+            spread: 60,
+            origin: { x: 0.9, y: 0.7 },
+            colors: ['#39ff88', '#ffd700', '#9945ff']
+          });
+        }, 300);
+        return () => clearTimeout(timer1);
+      } catch (e) {}
+    }
+  }, [gameScreen]);
 
   return (
     <div className="w-full min-h-screen flex flex-col items-center justify-between bg-[#04050a] text-[#eef2f6] overflow-x-hidden relative select-none">
@@ -650,43 +697,81 @@ export default function HuhcatGame() {
 
           {/* WIN SCREEN */}
           {gameScreen === 'win' && (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#04050a]/90 backdrop-blur-md p-6 rounded-xl border border-[#39ff88]/40 overflow-hidden">
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-start sm:justify-center bg-[#04050a]/90 backdrop-blur-md p-2.5 sm:p-6 rounded-xl border border-[#39ff88]/40 overflow-y-auto sm:overflow-hidden">
               <img
                 src={`${cleanBase}splash.jpg`}
                 alt="HUHCAT"
                 className="absolute inset-0 w-full h-full object-cover object-center opacity-25 blur-sm pointer-events-none"
               />
-              <div className="relative z-10 max-w-sm w-full text-center">
-                <div className="w-24 h-24 mx-auto rounded-full p-1 bg-gradient-to-tr from-[#39ff88] to-yellow-400 pulse-emerald mb-3">
+              <div className="relative z-10 max-w-xs sm:max-w-sm w-full text-center my-auto">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto rounded-full p-1 bg-gradient-to-tr from-[#39ff88] to-yellow-400 pulse-emerald mb-1 sm:mb-1.5 flex items-center justify-center shadow-[0_0_25px_rgba(57,255,136,0.5)]">
                   <img src={`${cleanBase}cat_idle.png`} alt="Victory" className="w-full h-full rounded-full object-cover" />
                 </div>
 
-                <h2 className="text-3xl md:text-4xl font-extrabold font-syne grad-text mb-1">
+                <h2 className="text-lg sm:text-2xl md:text-3xl font-extrabold font-syne grad-text mb-0.5 tracking-tight">
                   ON-CHAIN LEGEND!
                 </h2>
-                <p className="text-xs font-mono text-[#39ff88] mb-4">Mice cleared. Blockchain secured in Ben Cat's name.</p>
+                <p className="text-[10px] sm:text-xs font-mono text-[#39ff88] mb-1.5 sm:mb-2">Mice cleared. Blockchain secured in Ben Cat's name.</p>
 
-                <div className="bg-[#0d111c]/90 border border-white/10 rounded-xl p-3 mb-5 font-mono text-xs text-left space-y-1 backdrop-blur-md">
-                  <div className="flex justify-between"><span className="text-zinc-400">SCORE:</span><span className="text-[#39ff88] font-bold">{score}</span></div>
-                  <div className="flex justify-between"><span className="text-zinc-400">TOTAL HUHs:</span><span className="text-yellow-400 font-bold">{huhCount} 🗣️</span></div>
-                  <div className="flex justify-between"><span className="text-zinc-400">STATUS:</span><span className="text-cyan-400 font-bold">HUH LEGEND</span></div>
+                <div className="grid grid-cols-2 gap-1 sm:gap-1.5 bg-[#0d111c]/90 border border-white/10 rounded-xl p-1.5 sm:p-2 mb-1.5 sm:mb-2 font-mono text-[9px] sm:text-xs backdrop-blur-md">
+                  <div className="p-1 sm:p-1.5 bg-black/50 rounded-lg">
+                    <span className="text-zinc-500 block text-[8px] sm:text-[10px]">VICTORY SCORE</span>
+                    <span className="text-sm sm:text-base font-bold text-[#39ff88]">{score}</span>
+                  </div>
+                  <div className="p-1 sm:p-1.5 bg-black/50 rounded-lg">
+                    <span className="text-zinc-500 block text-[8px] sm:text-[10px]">DISTANCE</span>
+                    <span className="text-sm sm:text-base font-bold text-purple-400">{Math.floor(gameStateRef.current.distance)}m</span>
+                  </div>
+                  <div className="p-1 sm:p-1.5 bg-black/50 rounded-lg">
+                    <span className="text-zinc-500 block text-[8px] sm:text-[10px]">MICE DELETED</span>
+                    <span className="text-sm sm:text-base font-bold text-cyan-400">{gameStateRef.current.mice.filter(m => !m.isAlive).length}</span>
+                  </div>
+                  <div className="p-1 sm:p-1.5 bg-black/50 rounded-lg">
+                    <span className="text-zinc-500 block text-[8px] sm:text-[10px]">TOTAL "HUH"s</span>
+                    <span className="text-sm sm:text-base font-bold text-yellow-400">{huhCount} 🗣️</span>
+                  </div>
                 </div>
 
-                <div className="flex flex-col gap-2">
+                {/* Level Seed for sharing */}
+                <div className="flex items-center justify-center gap-2 mb-1.5 sm:mb-2">
+                  <span className="text-[8px] sm:text-[10px] font-mono text-zinc-500">SEED: {gameStateRef.current.seed}</span>
+                  <button
+                    onClick={() => { navigator.clipboard.writeText(String(gameStateRef.current.seed)); }}
+                    className="px-1.5 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-[8px] sm:text-[9px] font-mono text-zinc-400 transition-colors cursor-pointer"
+                  >
+                    📋 Copy
+                  </button>
+                </div>
+
+                <div className="flex flex-col gap-1.5 w-full">
                   <button
                     onClick={restartGame}
-                    className="w-full py-3 rounded-xl bg-gradient-to-r from-[#39ff88] to-[#00d15c] text-[#001a0a] font-extrabold font-syne text-sm tracking-wider hover:scale-105 active:scale-95 transition-all cursor-pointer shadow-lg"
+                    className="w-full py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-[#39ff88] to-[#00d15c] text-[#001a0a] font-extrabold font-syne text-xs sm:text-sm tracking-wider hover:scale-105 active:scale-95 transition-all cursor-pointer shadow-lg"
                   >
                     🎮 PLAY AGAIN
                   </button>
-                  <a
-                    href={TELEGRAM_URL}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-full py-2.5 rounded-xl bg-[#229ed9]/20 hover:bg-[#229ed9]/30 text-[#229ed9] border border-[#229ed9]/40 font-mono text-xs font-bold text-center"
-                  >
-                    CELEBRATE IN TELEGRAM
-                  </a>
+                  <div className="grid grid-cols-2 gap-1.5 w-full">
+                    <a
+                      href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                        `🏆 Just beat the Gauntlet & reached the Solana V1 Inscription Portal! Final Score: ${score.toLocaleString()} $HUHCAT | Distance: ${Math.floor(gameStateRef.current.distance)}m.\n\nPlay free in browser: https://jmthomasofficial.github.io/huhcatgame/\n\n@HuhCatSolana #HUHCAT #Solana`
+                      )}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="py-1.5 sm:py-2 px-2 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/20 font-mono text-[10px] sm:text-xs font-bold transition-all text-center flex items-center justify-center gap-1"
+                    >
+                      <span>𝕏</span>
+                      <span>SHARE ON X</span>
+                    </a>
+                    <a
+                      href={TELEGRAM_URL}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="py-1.5 sm:py-2 px-2 rounded-xl bg-[#229ed9]/20 hover:bg-[#229ed9]/30 text-[#229ed9] border border-[#229ed9]/40 font-mono text-[10px] sm:text-xs font-bold text-center flex items-center justify-center gap-1"
+                    >
+                      <span>✈️</span>
+                      <span>TELEGRAM</span>
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>

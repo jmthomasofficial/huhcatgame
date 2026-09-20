@@ -128,6 +128,7 @@ export interface GameState {
   levelLength: number;
   gameOver: boolean;
   gameWon: boolean;
+  victoryTimer?: number;
   paused: boolean;
   screenShake: number;
   time: number;

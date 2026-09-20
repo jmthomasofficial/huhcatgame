@@ -332,3 +332,45 @@ export function toggleBgmMute(): boolean {
   setBgmMuted(!bgmMuted);
   return bgmMuted;
 }
+
+export function playVictorySound() {
+  try {
+    const ctx = getAudioContext();
+    const now = ctx.currentTime;
+    
+    // Triumphant Solana V1 victory fanfare (majestic arpeggio: C5 -> E5 -> G5 -> B5 -> C6 -> E6 -> G6)
+    const notes = [523.25, 659.25, 783.99, 987.77, 1046.50, 1318.51, 1567.98];
+    notes.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.type = idx === notes.length - 1 ? 'sawtooth' : 'triangle';
+      osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+      
+      gain.gain.setValueAtTime(0.22, now + idx * 0.08);
+      const duration = idx === notes.length - 1 ? 0.8 : 0.18;
+      gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + duration);
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      osc.start(now + idx * 0.08);
+      osc.stop(now + idx * 0.08 + duration);
+    });
+
+    // Deep sub-bass resonance surge
+    const subOsc = ctx.createOscillator();
+    const subGain = ctx.createGain();
+    subOsc.type = 'sine';
+    subOsc.frequency.setValueAtTime(110, now);
+    subOsc.frequency.exponentialRampToValueAtTime(55, now + 0.6);
+    subGain.gain.setValueAtTime(0.3, now);
+    subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+    subOsc.connect(subGain);
+    subGain.connect(ctx.destination);
+    subOsc.start(now);
+    subOsc.stop(now + 0.6);
+  } catch (e) {
+    console.warn('playVictorySound error:', e);
+  }
+}
